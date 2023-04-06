@@ -1,0 +1,58 @@
+Frontend:
+  Archetechture:
+    - A react based front end using rete.js to render components
+    - TODO: 
+  Files:
+    Index:
+      - Import React, useEffect, useState, createRoot and useRete
+      - Import styles.css
+      - Define Editor component:
+        - Use the custom useRete hook to set the container
+        - Render a full-width, full-height div and set the container reference
+      - Define App component:
+        - Initialize state for the visibility of the Editor component
+        - Render a button to destroy the Editor
+        - Render a GitHub ribbon
+        - Conditionally render the Editor component based on visibility state
+      - Get the root DOM element and render the App component
+    MyNode:
+      - Import React and required components from 'rete-react-render-plugin'
+      - Define MyNode class:
+        - Extend Node from 'rete-react-render-plugin'
+        - Define render method:
+          - Extract props and state
+          - Return JSX structure for the custom node:
+            - Render the node's title
+            - Render outputs with their sockets
+            - Render controls
+            - Render inputs with their sockets and controls
+    rete:
+      - Import libraries and components
+      - Create a Rete socket for numbers
+      - Define NumControl class:
+        - Define component's visual appearance
+        - Define constructor
+        - Define setValue method
+      - Define NumComponent class:
+        - Define constructor
+        - Define builder function
+        - Define worker function
+      - Define AddComponent class:
+        - Define constructor
+        - Define builder function
+        - Define worker function
+      - Create createEditor function:
+        - Create an array of predefined components
+        - Initialize the Rete editor and engine
+        - Register components with the editor and engine
+        - Create and position nodes
+        - Add nodes to the editor
+        - Connect nodes
+        - Add event listeners
+        - Resize the editor view and trigger initial processing
+        - Return the editor
+      - Create useRete custom React hook:
+        - Initialize state and ref
+        - Use useEffect to create and destroy the editor
+        - Return the setContainer function
+
