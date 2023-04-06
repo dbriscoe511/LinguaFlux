@@ -1,10 +1,19 @@
-FROM node:lts
+# base image
+FROM node:14
 
+# set working directory
 WORKDIR /app
 
-COPY package*.json ./
+# add `/app/node_modules/.bin` to $PATH
+ENV PATH /app/node_modules/.bin:$PATH
+
+# install and cache app dependencies
+COPY package.json ./
+COPY package-lock.json ./
 RUN npm install
 
-COPY . .
+# copy the rest of the frontend code
+COPY . ./
 
-CMD ["npm", "run", "serve"]
+# start the app
+CMD ["npm", "start"]
