@@ -1,6 +1,7 @@
 import Rete from "rete";
 import axios from 'axios';
 import { NumControl, numSocket } from "./controllers";
+import { dynamic_input } from './dynamic_io';
 
 class AddComponent extends Rete.Component {
     constructor() {
@@ -9,38 +10,57 @@ class AddComponent extends Rete.Component {
 
     builder(node) {
         console.log("AddComponent builder called with node:", node);
-        var inp1 = new Rete.Input("num1", "Number", numSocket);
-        var inp2 = new Rete.Input("num2", "Number2", numSocket);
+        var inp0 = new Rete.Input("num0", "Number", numSocket);
+        var inp1 = new Rete.Input("num1", "Number2", numSocket);
+        var inp_inp = new Rete.Input("inputs", "Inputs", numSocket);
         var out = new Rete.Output("num", "Number", numSocket);
 
+        inp0.addControl(new NumControl(this.editor, "num0", node));
         inp1.addControl(new NumControl(this.editor, "num1", node));
-        inp2.addControl(new NumControl(this.editor, "num2", node));
+        inp_inp.addControl(new NumControl(this.editor, "inputs", node));
 
         return node
+        .addInput(inp0)
         .addInput(inp1)
-        .addInput(inp2)
+        .addInput(inp_inp)
         .addControl(new NumControl(this.editor, "preview", node, true))
         .addOutput(out);
     }
 
     async worker(node, inputs, outputs) {
-        var n1 = inputs["num1"].length ? inputs["num1"][0] : node.data.num1;
-        var n2 = inputs["num2"].length ? inputs["num2"][0] : node.data.num2;
-        var sum = -1;
-
-        try {
-            const response = await axios.post('http://localhost:5000/api/add', { num1: n1, num2: n2 });
-            console.log('Response from Flask backend:', response);
-            sum = response.data.sum;
-        } catch (error) {
-            console.error('Error calling Flask backend:', error);
+        const num_inputs = inputs["inputs"].length ? inputs["inputs"][0] : node.data.inputs;
+        const numbers = [];
+      
+        for (let i = 0; i <= num_inputs; i++) {
+            try {
+                const inputValue = inputs["dyn_inp" + i].length ? inputs["dyn_inp" + i][0] : node.data["dyn_inp" + i];
+                numbers.push(inputValue);
+            } catch (error) {
+                console.log("input at index", i, "is not defined");
+            }
         }
+      
+        let sum = -1;
+      
+        try {
+          const response = await axios.post("http://localhost:5000/api/add", { numbers });
+          console.log("Response from Flask backend:", response);
+          sum = response.data.sum;
+        } catch (error) {
+          console.error("Error calling Flask backend:", error);
+        }
+      
         this.editor.nodes
-            .find((n) => n.id == node.id)
-            .controls.get("preview")
-            .setValue(sum);
+          .find((n) => n.id === node.id)
+          .controls.get("preview")
+          .setValue(sum);
         outputs["num"] = sum;
+      
+        //const nodeInstance = this.editor.nodes.find((n) => n.id === node.id);
+        //dynamic_input(node.id, num_inputs, this.editor, numSocket, NumControl);
+        
     }
+
 }
 
 class NumComponent extends Rete.Component {

@@ -9,14 +9,14 @@ import { MyNode } from "./MyNode";
 
 //import custom parts
 import { AddComponent, NumComponent } from "./rete_components/math_part";
-import { TextComponent, ParagraphInput, StaticTextComponent } from "./rete_components/text_part";
+import { TextComponent, ParagraphInput, StaticTextComponent, LLM_comp } from "./rete_components/text_part";
 
 
 
 
 
 export async function createEditor(container) {
-  var components = [new NumComponent(), new AddComponent(), new TextComponent(), new ParagraphInput(), new StaticTextComponent()];
+  var components = [new NumComponent(), new AddComponent(), new TextComponent(), new ParagraphInput(), new StaticTextComponent(), new LLM_comp()];
 
   var editor = new Rete.NodeEditor("demo@0.1.0", container);
   editor.use(ConnectionPlugin);
@@ -30,20 +30,7 @@ export async function createEditor(container) {
     engine.register(c);
   });
 
-  var n1 = await components[0].createNode({ num: 2 });
-  var n2 = await components[0].createNode({ num: 3 });
-  var add = await components[1].createNode();
-
-  n1.position = [80, 200];
-  n2.position = [80, 400];
-  add.position = [500, 240];
-
-  editor.addNode(n1);
-  editor.addNode(n2);
-  editor.addNode(add);
-
-  editor.connect(n1.outputs.get("num"), add.inputs.get("num1"));
-  editor.connect(n2.outputs.get("num"), add.inputs.get("num2"));
+  add_text_test_blocks(components, editor)
 
   editor.on(
     "process nodecreated noderemoved connectioncreated connectionremoved",
@@ -84,4 +71,56 @@ export function useRete() {
   }, []);
 
   return [setContainer];
+}
+
+async function add_number_test_blocks(components, editor){
+  var n1 = await components[0].createNode({ num: 2 });
+  var n2 = await components[0].createNode({ num: 3 });
+  var add = await components[1].createNode({ inp_inp: 2 });
+
+  n1.position = [80, 200];
+  n2.position = [80, 400];
+  add.position = [500, 240];
+
+
+  editor.addNode(n1);
+  editor.addNode(n2);
+  editor.addNode(add);
+
+  //editor.connect(n1.outputs.get("num"), add.inputs.get("dyn_inp0"));
+  //editor.connect(n2.outputs.get("num"), add.inputs.get("dyn_inp1"));
+
+}
+
+async function add_text_test_blocks(components, editor){
+  console.log("adding text test blocks");
+  var disp = await components[4].createNode();
+  var disp2 = await components[4].createNode();
+  var text_in = await components[2].createNode({ text: "skirt steak" });
+  var text_in2 = await components[2].createNode({ text: "chinese" });
+  var main_input = await components[3].createNode({ text: "Create a recipe with {ingredient} as the star, inspired by {culture} food" });
+  var llm = await components[5].createNode();
+
+  console.log("moving nodes")
+
+  disp.position = [1000, 500];
+  disp2.position = [1400, 300];
+  text_in.position = [80, 400];
+  text_in2.position = [80, 600];
+  main_input.position = [500, 240];
+  llm.position = [1000, 200];
+
+  console.log("adding nodes")
+  editor.addNode(disp);
+  editor.addNode(disp2);
+  editor.addNode(text_in);
+  editor.addNode(text_in2);
+  editor.addNode(main_input);
+  editor.addNode(llm);
+
+  console.log("connecting nodes")
+  //editor.connect(text_in.outputs.get("text"), main_input.inputs.get("dyn_inp0"));
+  editor.connect(main_input.outputs.get("text"), disp.inputs.get("text"));
+  editor.connect(main_input.outputs.get("text"), llm.inputs.get("message"));
+  editor.connect(llm.outputs.get("text"), disp2.inputs.get("text"));
 }
