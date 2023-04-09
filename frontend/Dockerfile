@@ -15,5 +15,6 @@ RUN npm install
 # copy the rest of the frontend code
 COPY . ./
 
+
 # start the app
 CMD ["npm", "start"]

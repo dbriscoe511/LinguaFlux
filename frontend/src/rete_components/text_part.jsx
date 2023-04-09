@@ -76,7 +76,7 @@ class LLM_comp extends Rete.Component {
         //todo: move these to a config file       
         let default_system_msg = "You are a helpful assistant.";
         let avalible_assistants = ["GPT3.5","fake_assistant"]
-        let default_model = avalible_assistants[0];
+        let default_model = avalible_assistants[1];
 
         var response = new Rete.Output("text", "Last response", textSocket);
         var model = new Rete.Input("model", "Model", textSocket);
@@ -86,6 +86,8 @@ class LLM_comp extends Rete.Component {
         model.addControl(new DropdownControl(this.editor, "model", node, avalible_assistants, false, "model: ", default_model));
         system_msg.addControl(new TextControl(this.editor, "system_msg", node,false, "system_msg: ", default_system_msg));
         message.addControl(new TextControl(this.editor, "message", node,false, "message: "));
+
+        
         
 
         return node
@@ -95,7 +97,28 @@ class LLM_comp extends Rete.Component {
           .addInput(message);
 
     }
-    worker(node, inputs, outputs) {
+    async worker(node, inputs, outputs) {
+
+      let ai_model = inputs["model"].length ? inputs["model"][0] : node.data.model;
+      let system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
+      let message = inputs["message"].length ? inputs["message"][0] : node.data.message;
+
+      let api_url = "http://localhost:5000/api/";
+      let api_endpoint = `llm/${ai_model}`;
+
+      let query = {"system_msg": system_msg, "message": message};
+      console.log("Query to Flask backend:", query);
+      console.log("API endpoint:", (api_url+api_endpoint));
+
+      let stringy = "";
+      try {
+        const response = await axios.post((api_url+api_endpoint), query );
+        console.log("Response from Flask backend:", response);
+        stringy = response.data.output;
+      } catch (error) {
+        console.error("Error calling Flask backend:", error);
+      }
+      outputs["text"] = stringy;
     }
 }
 
