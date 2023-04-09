@@ -1,7 +1,7 @@
 import Rete from "rete";
 import axios from 'axios';
 import { dynamic_input, StringSubstitutor } from './dynamic_io';
-import {TextControl, textSocket, ParagraphControl, StaticTextControl, DropdownControl} from "./controllers";
+import {TextControl, textSocket, ParagraphControl, StaticTextControl, DropdownControl, ButtonControl} from "./controllers";
 
 class TextComponent extends Rete.Component {
     //single line input, not super useful
@@ -87,38 +87,52 @@ class LLM_comp extends Rete.Component {
         system_msg.addControl(new TextControl(this.editor, "system_msg", node,false, "system_msg: ", default_system_msg));
         message.addControl(new TextControl(this.editor, "message", node,false, "message: "));
 
-        
+        var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
+
         
 
         return node
           .addOutput(response)
           .addInput(model)
           .addInput(system_msg)
-          .addInput(message);
+          .addInput(message)
+          .addControl(confirmButton);
 
     }
-    async worker(node, inputs, outputs) {
-
-      let ai_model = inputs["model"].length ? inputs["model"][0] : node.data.model;
-      let system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
-      let message = inputs["message"].length ? inputs["message"][0] : node.data.message;
-
+    async onConfirmButtonClick(node) {
+      const ai_model = node.data.model;
+      const system_msg = node.data.system_msg;
+      const message = node.data.message;
+  
+      // Call the API and update the output
+      node.data.response = await this.callAPI(ai_model, system_msg, message);
+      this.editor.trigger("process");
+    }
+    
+    async callAPI(ai_model, system_msg, message) {
       let api_url = "http://localhost:5000/api/";
       let api_endpoint = `llm/${ai_model}`;
-
-      let query = {"system_msg": system_msg, "message": message};
+  
+      let query = { "system_msg": system_msg, "message": message };
       console.log("Query to Flask backend:", query);
-      console.log("API endpoint:", (api_url+api_endpoint));
-
+      console.log("API endpoint:", (api_url + api_endpoint));
+  
       let stringy = "";
       try {
-        const response = await axios.post((api_url+api_endpoint), query );
+        const response = await axios.post((api_url + api_endpoint), query);
         console.log("Response from Flask backend:", response);
         stringy = response.data.output;
       } catch (error) {
         console.error("Error calling Flask backend:", error);
       }
-      outputs["text"] = stringy;
+      return stringy;
+    }
+    async worker(node, inputs, outputs) {
+      // Just pass the output value through
+      outputs["text"] = node.data.response || "";
+      node.data.model = inputs["model"].length ? inputs["model"][0] : node.data.model;
+      node.data.system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
+      node.data.message = inputs["message"].length ? inputs["message"][0] : node.data.message;
     }
 }
 

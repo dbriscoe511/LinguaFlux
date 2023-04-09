@@ -38,6 +38,38 @@ class NumControl extends Rete.Control {
     }
   }
 
+class ButtonControl extends Rete.Control {
+  static component = ({ label, onClick }) => (
+    <div>
+      {label && <label>{label}</label>}
+      <button
+        onClick={onClick}
+        ref={(ref) => {
+          ref &&
+            ref.addEventListener("pointerdown", (e) => e.stopPropagation());
+        }}
+      >
+        Confirm
+      </button>
+    </div>
+  );
+
+  constructor(emitter, key, node, onClick, label = null) {
+    super(key);
+    this.emitter = emitter;
+    this.key = key;
+    this.component = ButtonControl.component;
+
+    this.props = {
+      label,
+      onClick: () => {
+        onClick(node);
+        this.emitter.trigger("process");
+      },
+    };
+  }
+}
+  
 class TextControl extends Rete.Control {
   static component = ({ label, value, onChange, readonly }) => (
     <div>
@@ -205,4 +237,4 @@ class StaticTextControl extends Control {
 const numSocket = new Rete.Socket("Number value");  
 const textSocket = new Rete.Socket("String value");  
 
-export { NumControl, numSocket, TextControl, ParagraphControl, StaticTextControl, textSocket, DropdownControl};
+export { NumControl, numSocket, TextControl, ParagraphControl, StaticTextControl, textSocket, DropdownControl, ButtonControl};
