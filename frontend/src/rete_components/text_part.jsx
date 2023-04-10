@@ -93,9 +93,6 @@ class LLM_comp extends Rete.Component {
 
         var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
 
-        // Create a reference to the MyNode instance
-        //node.data.myNodeInstance = new this.data.component(node);
-        //console.log("node.myNodeInstance:", node.data.myNodeInstance);
         // Create a reference to the MyNode component (not an instance)
         this.MyNodeComponent = MyNode;
 
@@ -113,19 +110,14 @@ class LLM_comp extends Rete.Component {
       const system_msg = node.data.system_msg;
       const message = node.data.message;
   
-      // Call the API and update the output
-      //node.data.component.setNodeState('node_waiting_for_backend');
 
-      node.state = {nodeState: 'node_waiting_for_backend'}
+      this.set_node_state(node, 'node_waiting_for_backend');
 
       try{
         node.data.response = await this.callAPI(ai_model, system_msg, message);
       } catch  (error) {
         console.error("Error calling Flask backend:", error);
-        // Set the node state to 'node_processing_error'
-        //node.data.component.setNodeState('node_processing_error');
-        node.state = {nodeState: 'node_processing_error'}
-        // Set the error message
+        this.set_node_state(node, 'node_processing_error');
         node.data.response = error.message;
       }
       this.editor.trigger("process");
@@ -149,33 +141,23 @@ class LLM_comp extends Rete.Component {
       }
       return stringy;
     }
-    getNodeInstance(node) {
-      return this.editor.nodes.find((n) => n.id === node.id);;
+
+    set_node_state(node, state) {
+      // this is a hack, but I dont know how else to do it
+      let instance = this.editor.nodes.find((n) => n.id === node.id);;
+      instance.setMeta({nodeState: state});
+      instance.update();
     }
+
     async worker(node, inputs, outputs) {
-      // Just pass the output value through
-      //if (!node.myNodeInstance) {
-        //node.myNodeInstance = this.editor.nodes.find((n) => n.id === node.id).component;
-        
-      //}
-      console.log("node.myNodeInstance:", this.data.component);
 
       outputs["text"] = node.data.response || "";
       node.data.model = inputs["model"].length ? inputs["model"][0] : node.data.model;
       node.data.system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
       node.data.message = inputs["message"].length ? inputs["message"][0] : node.data.message;
 
-      //when the inputs are updated, the node is waiting for the user to confirm
-      //node.data.component.setNodeState('node_waiting_for_confirmation');
-      //node.data.myNodeInstance.setNodeState('node_waiting_for_confirmation');
-      //this.data.component.MyNode.setNodeState('node_waiting_for_confirmation');
-      //node.data.nodeState = 'node_waiting_for_confirmation';
+      this.set_node_state(node, 'node_waiting_for_confirmation');
 
-      node.data.nodeState = 'node_waiting_for_confirmation';
-      const nodeInstance = this.getNodeInstance(node);
-      //nodeInstance.setState({ nodeState: node.data.nodeState });
-
-      console.log("node.data.nodeState according to textpart:", node.data.nodeState);
     }
 
 }

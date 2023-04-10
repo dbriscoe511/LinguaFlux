@@ -5,23 +5,6 @@ export class MyNode extends Node {
   render() {
     const { node, bindSocket, bindControl} = this.props;
     const { outputs, controls, inputs, selected} = this.state;
-    //const nodeState = node.data.nodeState; // Get nodeState from node.data
-    console.log("nodedata according to MyNode", node.data);
-    console.log("nodedata according to MyNode with a json", JSON.stringify(node.data, null, 2))
-    console.log("nodeState according to MyNode", node.data.nodeState);
-
-    const nodeClrValue = Object.getOwnPropertyDescriptor(node.data, 'nodeState')?.value;
-    console.log("nodeState according to MyNode with property desc", nodeClrValue);
-
-    const symbols = Object.getOwnPropertySymbols(node.data);
-    console.log('Symbols:', symbols);
-    
-    const nodeClrSymbol = symbols.find(symbol => symbol.description === 'nodeState');
-    console.log('nodeClr Symbol:', nodeClrSymbol);
-
-    const nodeClrValue2 = node.data[nodeClrSymbol];
-    console.log('nodeClr Value:', nodeClrValue2);
-
 
       // Helper function to determine the color of a socket based on its type
       const getSocketColor = (socket) => {
@@ -51,7 +34,7 @@ export class MyNode extends Node {
       }
     };
     return (
-      <div className={`node ${selected}`} style={{ background: getNodeColor(this.state.nodeState) }}>
+      <div className={`node ${selected}`} style={{ background: getNodeColor(node.meta.nodeState) }}>
         <div className="title">
           {"<<"} {node.name} {">>"}
         </div>
