@@ -18,6 +18,7 @@ def fake_assistant():
     data = request.get_json()
     system_msg = data.get('system_msg', '')
     message = data.get('message', '')
+    app.logger.info(f"Fake assistant API route called with system message: \"{system_msg}\" and message: \"{message}\"")
 
     fake_responses = [
         f"Wow, I can barely contain my excitement...\nSystem message: \"{system_msg}\"\nMessage: \"{message}\"\nTruly groundbreaking stuff.",
@@ -32,6 +33,7 @@ def fake_assistant():
 
 @app.route('/api/test', methods=['GET'])
 def test_route():
+    app.logger.info("Test API route called")
     return jsonify({'message': 'Test route working'})
 
 @app.route('/api/llm/GPT3.5', methods=['POST'])
