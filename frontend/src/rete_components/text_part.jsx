@@ -2,7 +2,7 @@ import Rete from "rete";
 import axios from 'axios';
 import { dynamic_input, StringSubstitutor } from './dynamic_io';
 import { MyNode } from './MyNode';
-import {TextControl, textSocket, ParagraphControl, StaticTextControl, DropdownControl, ButtonControl} from "./controllers";
+import {TextControl, textSocket, ParagraphControl, DropdownControl, ButtonControl} from "./controllers";
 
 class TextComponent extends Rete.Component {
     //single line input, not super useful

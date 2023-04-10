@@ -214,32 +214,6 @@ class ParagraphControl extends Control {
   }
 }
 
-class StaticTextControl extends Control {
-  static component = ({ value }) => (
-    <div className="default-text-item" style={{ whiteSpace: 'pre-wrap' }}>
-      {value}
-    </div>
-  );
-
-  constructor(emitter, key, node) {
-    super(key);
-    this.emitter = emitter;
-    this.key = key;
-    this.component = StaticTextControl.component;
-
-    const initial = node.data[key] || '';
-    node.data[key] = initial;
-    this.props = {
-      value: initial
-    };
-  }
-
-  setValue(val) {
-    this.props.value = val;
-    this.putData(this.key, val);
-    this.update();
-  }
-}
 
 
 
@@ -247,4 +221,4 @@ class StaticTextControl extends Control {
 const numSocket = new Rete.Socket("Number value");  
 const textSocket = new Rete.Socket("String value");  
 
-export { NumControl, numSocket, TextControl, ParagraphControl, StaticTextControl, textSocket, DropdownControl, ButtonControl};
+export { NumControl, numSocket, TextControl, ParagraphControl, textSocket, DropdownControl, ButtonControl};
