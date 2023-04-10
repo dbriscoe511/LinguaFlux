@@ -7,21 +7,6 @@ export class MyNode extends Node {
     const { node, bindSocket, bindControl} = this.props;
     const { outputs, controls, inputs, selected} = this.state;
 
-      // Helper function to determine the color of a socket based on its type
-      const getSocketClassName = (socket) => {
-        switch (socket.name) {
-          case 'String value':
-            return 'string-value';
-          case 'Number value':
-            return 'number-value';
-          case 'Array':
-            return 'array';
-          default:
-            return 'default';
-        }
-      };
-      
-
     const getNodeColor = (nodeState) => {
       switch (nodeState) {
         case 'node_processing_error':
@@ -50,7 +35,6 @@ export class MyNode extends Node {
               socket={output.socket}
               io={output}
               innerRef={bindSocket}
-              className={`socket.${getSocketColor(output.socket)}`}
             />
           </div>
         ))}
@@ -71,7 +55,6 @@ export class MyNode extends Node {
               socket={input.socket}
               io={input}
               innerRef={bindSocket}
-              className={`socket.${getSocketColor(input.socket)}`}
             />
             {!input.showControl() && (
               <div className="input-title">{input.name}</div>
