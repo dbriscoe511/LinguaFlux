@@ -26,7 +26,7 @@ class TextComponent extends Rete.Component {
 class ParagraphInput extends Rete.Component {
     constructor() {
         super("Paragraph input");
-        this.data.component = MyNode; // optional
+        //this.data.component = MyNode; // optional
     }
 
     builder(node) {
@@ -94,8 +94,10 @@ class LLM_comp extends Rete.Component {
         var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
 
         // Create a reference to the MyNode instance
-        node.data.myNodeInstance = new this.data.component(node);
-        console.log("node.myNodeInstance:", node.data.myNodeInstance);
+        //node.data.myNodeInstance = new this.data.component(node);
+        //console.log("node.myNodeInstance:", node.data.myNodeInstance);
+        // Create a reference to the MyNode component (not an instance)
+        this.MyNodeComponent = MyNode;
 
 
         return node
@@ -147,6 +149,9 @@ class LLM_comp extends Rete.Component {
       }
       return stringy;
     }
+    getNodeInstance(node) {
+      return this.editor.nodes.find((n) => n.id === node.id);;
+    }
     async worker(node, inputs, outputs) {
       // Just pass the output value through
       //if (!node.myNodeInstance) {
@@ -163,8 +168,16 @@ class LLM_comp extends Rete.Component {
       //when the inputs are updated, the node is waiting for the user to confirm
       //node.data.component.setNodeState('node_waiting_for_confirmation');
       //node.data.myNodeInstance.setNodeState('node_waiting_for_confirmation');
-      this.data.component.MyNode.setNodeState('node_waiting_for_confirmation');
+      //this.data.component.MyNode.setNodeState('node_waiting_for_confirmation');
+      //node.data.nodeState = 'node_waiting_for_confirmation';
+
+      node.data.nodeState = 'node_waiting_for_confirmation';
+      const nodeInstance = this.getNodeInstance(node);
+      //nodeInstance.setState({ nodeState: node.data.nodeState });
+
+      console.log("node.data.nodeState according to textpart:", node.data.nodeState);
     }
+
 }
 
 
