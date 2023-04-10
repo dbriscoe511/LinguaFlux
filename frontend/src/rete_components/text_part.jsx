@@ -93,9 +93,6 @@ class LLM_comp extends Rete.Component {
 
         var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
 
-        // Create a reference to the MyNode component (not an instance)
-        this.MyNodeComponent = MyNode;
-
 
         return node
           .addOutput(response)
@@ -121,6 +118,8 @@ class LLM_comp extends Rete.Component {
         node.data.response = error.message;
       }
       this.editor.trigger("process");
+
+      this.set_node_state(node, 'default');
     }
     
     async callAPI(ai_model, system_msg, message) {
@@ -139,6 +138,8 @@ class LLM_comp extends Rete.Component {
       } catch (error) {
         console.error("Error calling Flask backend:", error);
       }
+
+      
       return stringy;
     }
 
@@ -148,6 +149,11 @@ class LLM_comp extends Rete.Component {
       instance.setMeta({nodeState: state});
       instance.update();
     }
+    get_node_state(node) {
+      // this is a hack, but I dont know how else to do it
+      let instance = this.editor.nodes.find((n) => n.id === node.id);;
+      return instance.meta.nodeState;
+    }
 
     async worker(node, inputs, outputs) {
 
@@ -156,7 +162,10 @@ class LLM_comp extends Rete.Component {
       node.data.system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
       node.data.message = inputs["message"].length ? inputs["message"][0] : node.data.message;
 
-      this.set_node_state(node, 'node_waiting_for_confirmation');
+      let state = this.get_node_state(node);
+      if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
+        this.set_node_state(node, 'node_waiting_for_confirmation');
+      }
 
     }
 
