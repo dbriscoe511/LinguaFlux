@@ -53,7 +53,7 @@ def GPT3_5():
         output = call['choices']['message']['content']
         app.logger.info(f"GPT3.5 request successful. Input message: {message}, Output message: {output}")
     except Exception as e:
-        app.logger.error(f"Error calling GPT3.5: {e}")
+        app.logger.error(f"Error calling GPT3.5: {e} \n Input message: {message} \n System message: {system_msg}")
         return jsonify({"error": "Error calling GPT3.5"}), 500
 
     output = call['choices']['message']['content']
