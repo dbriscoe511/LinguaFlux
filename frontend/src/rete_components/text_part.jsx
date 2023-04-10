@@ -1,6 +1,7 @@
 import Rete from "rete";
 import axios from 'axios';
 import { dynamic_input, StringSubstitutor } from './dynamic_io';
+import { MyNode } from './MyNode';
 import {TextControl, textSocket, ParagraphControl, StaticTextControl, DropdownControl, ButtonControl} from "./controllers";
 
 class TextComponent extends Rete.Component {
@@ -25,6 +26,7 @@ class TextComponent extends Rete.Component {
 class ParagraphInput extends Rete.Component {
     constructor() {
         super("Paragraph input");
+        this.data.component = MyNode; // optional
     }
 
     builder(node) {
@@ -71,6 +73,8 @@ class ParagraphInput extends Rete.Component {
 class LLM_comp extends Rete.Component {
     constructor() {
         super("LLM completion");
+        this.data.component = MyNode; // optional
+        
     }
     builder(node) {
         //todo: move these to a config file       
@@ -89,7 +93,10 @@ class LLM_comp extends Rete.Component {
 
         var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
 
-        
+        // Create a reference to the MyNode instance
+        node.data.myNodeInstance = new this.data.component(node);
+        console.log("node.myNodeInstance:", node.data.myNodeInstance);
+
 
         return node
           .addOutput(response)
@@ -105,7 +112,20 @@ class LLM_comp extends Rete.Component {
       const message = node.data.message;
   
       // Call the API and update the output
-      node.data.response = await this.callAPI(ai_model, system_msg, message);
+      //node.data.component.setNodeState('node_waiting_for_backend');
+
+      node.state = {nodeState: 'node_waiting_for_backend'}
+
+      try{
+        node.data.response = await this.callAPI(ai_model, system_msg, message);
+      } catch  (error) {
+        console.error("Error calling Flask backend:", error);
+        // Set the node state to 'node_processing_error'
+        //node.data.component.setNodeState('node_processing_error');
+        node.state = {nodeState: 'node_processing_error'}
+        // Set the error message
+        node.data.response = error.message;
+      }
       this.editor.trigger("process");
     }
     
@@ -129,10 +149,21 @@ class LLM_comp extends Rete.Component {
     }
     async worker(node, inputs, outputs) {
       // Just pass the output value through
+      //if (!node.myNodeInstance) {
+        //node.myNodeInstance = this.editor.nodes.find((n) => n.id === node.id).component;
+        
+      //}
+      console.log("node.myNodeInstance:", this.data.component);
+
       outputs["text"] = node.data.response || "";
       node.data.model = inputs["model"].length ? inputs["model"][0] : node.data.model;
       node.data.system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
       node.data.message = inputs["message"].length ? inputs["message"][0] : node.data.message;
+
+      //when the inputs are updated, the node is waiting for the user to confirm
+      //node.data.component.setNodeState('node_waiting_for_confirmation');
+      //node.data.myNodeInstance.setNodeState('node_waiting_for_confirmation');
+      this.data.component.MyNode.setNodeState('node_waiting_for_confirmation');
     }
 }
 

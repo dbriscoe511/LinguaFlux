@@ -6,8 +6,36 @@ export class MyNode extends Node {
     const { node, bindSocket, bindControl } = this.props;
     const { outputs, controls, inputs, selected } = this.state;
 
+      // Helper function to determine the color of a socket based on its type
+      const getSocketColor = (socket) => {
+        switch (socket.name) {
+          case 'String value':
+            return 'orange';
+          case 'Number value':
+            return 'purple';
+          default:
+            return 'grey';
+        }
+      };
+      
+
+    const getNodeColor = (nodeState) => {
+      switch (nodeState) {
+        case 'node_processing_error':
+          return 'red';
+        case 'node_waiting_for_backend':
+          return 'yellow';
+        case 'node_waiting_for_confirmation':
+          return 'blue';
+        case 'ghost_node':
+          return 'lightgrey';
+        default:
+          return 'orange';
+      }
+    };
+
     return (
-      <div className={`node ${selected}`} style={{ background: "grey" }}>
+      <div className={`node ${selected}`} style={{ background: getNodeColor(this.state.nodeState) }}>
         <div className="title">
           {"<<"} {node.name} {">>"}
         </div>
@@ -20,6 +48,7 @@ export class MyNode extends Node {
               socket={output.socket}
               io={output}
               innerRef={bindSocket}
+              color={getSocketColor(output.socket)}
             />
           </div>
         ))}
@@ -40,6 +69,7 @@ export class MyNode extends Node {
               socket={input.socket}
               io={input}
               innerRef={bindSocket}
+              color={getSocketColor(input.socket)}
             />
             {!input.showControl() && (
               <div className="input-title">{input.name}</div>
@@ -55,5 +85,12 @@ export class MyNode extends Node {
         ))}
       </div>
     );
+  }
+  setNodeState(newState) {
+    //this.setState({ nodeState: newState });
+    //console.log("Node state:", newState);
+
+    this.state.nodeState = newState;
+    this.trigger('stateChanged', newState);
   }
 }

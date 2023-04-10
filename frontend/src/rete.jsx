@@ -5,7 +5,7 @@ import ReactRenderPlugin from "rete-react-render-plugin";
 import ConnectionPlugin from "rete-connection-plugin";
 import AreaPlugin from "rete-area-plugin";
 import Context from "efficy-rete-context-menu-plugin";
-import { MyNode } from "./MyNode";
+
 
 //import custom parts
 import { AddComponent, NumComponent } from "./rete_components/math_part";
