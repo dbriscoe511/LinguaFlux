@@ -12,63 +12,74 @@ export class MyNode extends Node {
         case 'node_processing_error':
           return 'red';
         case 'node_waiting_for_backend':
-          return 'yellow';
+          return 'rgb(247, 153, 110)';
         case 'node_waiting_for_confirmation':
-          return 'blue';
+          return 'rgb(167, 196, 181)';
         case 'ghost_node':
-          return 'lightgrey';
+          return 'rgb(116, 148, 234)';
         default:
-          return 'orange';
+          return 'rgb(247, 153, 110)';
       }
     };
     return (
-      <div className={`node ${selected}`} style={{ background: getNodeColor(node.meta.nodeState) }}>
-        <div className="title">
-          {"<<"} {node.name} {">>"}
+      <div className={`node ${selected}`} >
+        <div className="title" style={{ background: getNodeColor(node.meta.nodeState) }}>
+          {node.name}
         </div>
-        {/* Outputs */}
-        {outputs.map((output) => (
-          <div className="output" key={output.key}>
-            <div className="output-title" >{output.name}</div>
-            <Socket
-              type="output"
-              socket={output.socket}
-              io={output}
-              innerRef={bindSocket}
-            />
+        <div className="node-content" style={{ display: "flex" }}> {/* Add this container div */}
+         {/* Inputs */}
+         <div className="inputs">
+            {inputs.map((input) => (
+              <div className="input" key={input.key}>
+                <Socket
+                  type="input"
+                  socket={input.socket}
+                  io={input}
+                  innerRef={bindSocket}
+                />
+                {!input.showControl() && (
+                  <div className="input-title">{input.name}</div>
+                )}
+                {input.showControl() && (
+                  <Control
+                    className="input-control"
+                    control={input.control}
+                    innerRef={bindControl}
+                  />
+                )}
+              </div>
+            ))}
           </div>
-        ))}
-        {/* Controls */}
-        {controls.map((control) => (
-          <Control
-            className="control"
-            key={control.key}
-            control={control}
-            innerRef={bindControl}
-          />
-        ))}
-        {/* Inputs */}
-        {inputs.map((input) => (
-          <div className="input" key={input.key}>
-            <Socket
-              type="input"
-              socket={input.socket}
-              io={input}
-              innerRef={bindSocket}
-            />
-            {!input.showControl() && (
-              <div className="input-title">{input.name}</div>
-            )}
-            {input.showControl() && (
+
+          {/* Controls */}
+          <div className="controls">
+            {controls.map((control) => (
               <Control
-                className="input-control"
-                control={input.control}
+                className="control"
+                key={control.key}
+                control={control}
                 innerRef={bindControl}
               />
-            )}
+            ))}
           </div>
-        ))}
+
+          {/* Outputs */}
+          <div className="outputs">
+            {outputs.map((output) => (
+              <div className="output" key={output.key}>
+                <div className="output-title">{output.name}</div>
+                <Socket
+                  type="output"
+                  socket={output.socket}
+                  io={output}
+                  innerRef={bindSocket}
+                />
+              </div>
+            ))}
+          </div>
+        </div> {/* Close the container div */}
       </div>
     );
+    
   }
 }

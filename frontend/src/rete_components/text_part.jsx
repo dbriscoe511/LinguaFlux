@@ -8,6 +8,7 @@ class TextComponent extends Rete.Component {
     //single line input, not super useful
     constructor() {
       super("Text input");
+      this.data.component = MyNode
     }
   
     builder(node) {  
@@ -26,7 +27,7 @@ class TextComponent extends Rete.Component {
 class ParagraphInput extends Rete.Component {
     constructor() {
         super("Paragraph input");
-        //this.data.component = MyNode; // optional
+        this.data.component = MyNode
     }
 
     builder(node) {
@@ -73,7 +74,7 @@ class ParagraphInput extends Rete.Component {
 class LLM_comp extends Rete.Component {
     constructor() {
         super("LLM completion");
-        this.data.component = MyNode; // optional
+        this.data.component = MyNode;
         
     }
     builder(node) {
@@ -176,6 +177,7 @@ class LLM_comp extends Rete.Component {
 class StaticTextComponent extends Rete.Component {
   constructor() {
     super("Text Display");
+    this.data.component = MyNode
   }
 
   builder(node) {

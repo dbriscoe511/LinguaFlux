@@ -104,10 +104,10 @@ async function add_text_test_blocks(components, editor){
   console.log("moving nodes")
 
   disp.position = [1000, 500];
-  disp2.position = [1400, 300];
-  text_in.position = [80, 400];
-  text_in2.position = [80, 600];
-  main_input.position = [500, 240];
+  disp2.position = [1600, 300];
+  text_in.position = [-180, 400];
+  text_in2.position = [-180, 600];
+  main_input.position = [220, 240];
   llm.position = [1000, 200];
 
   console.log("adding nodes")

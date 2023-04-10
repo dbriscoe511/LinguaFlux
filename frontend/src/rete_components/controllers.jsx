@@ -3,6 +3,7 @@ import Rete from "rete";
 class NumControl extends Rete.Control {
     static component = ({ value, onChange }) => (
       <input
+        className="default-text-item"
         type="number"
         value={value}
         ref={(ref) => {
@@ -43,6 +44,7 @@ class ButtonControl extends Rete.Control {
     <div>
       {label && <label>{label}</label>}
       <button
+        className="default-text-item"
         onClick={onClick}
         ref={(ref) => {
           ref &&
@@ -73,8 +75,9 @@ class ButtonControl extends Rete.Control {
 class TextControl extends Rete.Control {
   static component = ({ label, value, onChange, readonly }) => (
     <div>
-      {label && <label>{label}</label>}
+      {label && <label className="input-title">{label}</label>}
       <input
+        className="default-text-item"
         type="text"
         value={value}
         readOnly={readonly}
@@ -117,8 +120,9 @@ class TextControl extends Rete.Control {
 class DropdownControl extends Rete.Control {
   static component = ({ label, value, onChange, readonly, options }) => (
     <div>
-      {label && <label>{label}</label>}
+      {label && <label className="input-title">{label}</label>}
       <select
+        className="default-text-item"
         value={value}
         disabled={readonly}
         ref={(ref) => {
@@ -176,6 +180,7 @@ class ParagraphControl extends Control {
         width: "300px",
         height: "200px",
       }}
+      className="default-text-item"
       ref={(ref) => {
         ref && ref.addEventListener("pointerdown", (e) => e.stopPropagation());
       }}
@@ -209,7 +214,11 @@ class ParagraphControl extends Control {
 }
 
 class StaticTextControl extends Control {
-  static component = ({ value }) => <div style={{ whiteSpace: 'pre-wrap' }}>{value}</div>;
+  static component = ({ value }) => (
+    <div className="default-text-item" style={{ whiteSpace: 'pre-wrap' }}>
+      {value}
+    </div>
+  );
 
   constructor(emitter, key, node) {
     super(key);

@@ -1,3 +1,20 @@
+/* sockets */
+.socket{
+    width: 16px;
+    height: 16px;
+    border: 1px solid rgb(48, 48, 48);
+}
+.socket:hover{
+    border: 3px solid rgb(48, 48, 48);
+}
+
+.socket.input{
+    margin-left: -8px; /*half the width*/
+}
+.socket.output{
+    margin-right: -8px;/*half the width*/
+}
+
 .socket.string-value {
     background: #b67718;
 }
@@ -10,4 +27,87 @@ background: rgb(49, 0, 68);
 .socket.default {
 background: grey;
 }
-  
+
+/* connections */
+.connection .main-path {
+    fill: none;
+    stroke-width: 5px;
+    stroke: rgb(148, 148, 148);
+}
+
+body{
+   margin:0;
+}
+
+.context-menu>.item{
+    border-bottom: 1px solid #e3c100c2;
+    background-color: rgba(61, 61, 61, 0.8)
+}
+
+.context-menu>.search{
+    border-bottom: 1px solid #e3c100c2 !important; /*this is overriden by inline css that comes with rete for some reason*/
+    background-color: rgba(61, 61, 61, 0.8) !important;
+}
+
+.App {
+    font-family: sans-serif;
+    text-align: center;
+    background-color: rgb(58, 58, 58);
+  }
+
+/* nodes */
+.node{
+    box-shadow:6px 6px 13px 2px rgba(0,0,0,0.75);
+    background: rgb(99, 93, 92);
+    border-color:rgb(71, 67, 66)
+}
+
+/* should apply shadow here to make it go behind the connections. however, it stays in front of connections even here.
+.node:before{
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow:6px 6px 13px 2px rgba(0,0,0,0.75);
+    z-index: -10000;
+}*/
+
+/* disable hover effect for now (same as unselected)*/
+.node:hover {
+    background: rgb(99, 93, 92);
+}
+
+.node.selected {
+    background: rgb(138, 131, 129);
+    border-color: #e3c000;
+}
+
+.node .title {
+    padding: 5px;
+    border-radius: inherit;
+}
+
+.outputs,
+.controls,
+.inputs {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.input:not(:last-child),
+.output:not(:last-child) {
+  margin-bottom: 10px;
+}
+/* controllers */
+.default-text-item {
+    background: rgba(138, 131, 129);
+    border-color:rgb(71, 67, 66);
+    color: rgb(255, 255, 255);
+    border-radius: 5px;
+    font-size: small;
+}
+
+
