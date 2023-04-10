@@ -1,6 +1,7 @@
 from app import app
 import numpy as np
 import random
+import openai
 from flask import Flask, request, jsonify
 
 @app.route('/api/add', methods=['POST'])
@@ -35,4 +36,25 @@ def test_route():
 
 @app.route('/api/llm/GPT3.5', methods=['POST'])
 def GPT3_5():
-    return jsonify({'output': 'This is a fake response from GPT3.5.'})
+    # Note: you need to be using OpenAI Python v0.27.0 for the code below to work
+    data = request.get_json()
+    system_msg = data.get('system_msg', '')
+    message = data.get('message', '')
+
+
+    try:
+        call = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+        messages=[
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": message}
+            ]
+        )
+        output = call['choices']['message']['content']
+        app.logger.info(f"GPT3.5 request successful. Input message: {message}, Output message: {output}")
+    except Exception as e:
+        app.logger.error(f"Error calling GPT3.5: {e}")
+        return jsonify({"error": "Error calling GPT3.5"}), 500
+
+    output = call['choices']['message']['content']
+    return jsonify({'output': output})
