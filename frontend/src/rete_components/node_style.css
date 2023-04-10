@@ -1,0 +1,13 @@
+.socket.string-value {
+    background: #b67718;
+}
+.socket.number-value {
+background: rgb(13, 104, 116);
+}
+.socket.array {
+background: rgb(49, 0, 68);
+}
+.socket.default {
+background: grey;
+}
+  

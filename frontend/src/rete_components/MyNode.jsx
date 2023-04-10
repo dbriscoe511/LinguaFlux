@@ -1,5 +1,6 @@
 import React from "react";
 import { Node, Socket, Control } from "rete-react-render-plugin";
+import "./node_style.css"
 
 export class MyNode extends Node {
   render() {
@@ -7,14 +8,16 @@ export class MyNode extends Node {
     const { outputs, controls, inputs, selected} = this.state;
 
       // Helper function to determine the color of a socket based on its type
-      const getSocketColor = (socket) => {
+      const getSocketClassName = (socket) => {
         switch (socket.name) {
           case 'String value':
-            return 'orange';
+            return 'string-value';
           case 'Number value':
-            return 'purple';
+            return 'number-value';
+          case 'Array':
+            return 'array';
           default:
-            return 'grey';
+            return 'default';
         }
       };
       
@@ -41,13 +44,13 @@ export class MyNode extends Node {
         {/* Outputs */}
         {outputs.map((output) => (
           <div className="output" key={output.key}>
-            <div className="output-title">{output.name}</div>
+            <div className="output-title" >{output.name}</div>
             <Socket
               type="output"
               socket={output.socket}
               io={output}
               innerRef={bindSocket}
-              color={getSocketColor(output.socket)}
+              className={`socket.${getSocketColor(output.socket)}`}
             />
           </div>
         ))}
@@ -68,7 +71,7 @@ export class MyNode extends Node {
               socket={input.socket}
               io={input}
               innerRef={bindSocket}
-              color={getSocketColor(input.socket)}
+              className={`socket.${getSocketColor(input.socket)}`}
             />
             {!input.showControl() && (
               <div className="input-title">{input.name}</div>
