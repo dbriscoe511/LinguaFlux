@@ -173,12 +173,13 @@ import React from 'react';
 import {Control} from 'rete';
 
 class ParagraphControl extends Control {
-  static component = ({ value, onChange }) => (
+  static component = ({ value, onChange, readOnly, size = { width: "300px", height: "200px" } }) => (
     <textarea
       value={value}
+      readOnly={readOnly}
       style={{
-        width: "300px",
-        height: "200px",
+        width: size.width,
+        height: size.height,
       }}
       className="default-text-item"
       ref={(ref) => {
@@ -188,7 +189,7 @@ class ParagraphControl extends Control {
     />
   );
 
-  constructor(emitter, key, node, readonly = false) {
+  constructor(emitter, key, node, readonly = false, size = { width: "300px", height: "200px" }) {
     super(key);
     this.emitter = emitter;
     this.key = key;

@@ -16,7 +16,7 @@
 }
 
 .socket.string-value {
-    background: #b67718;
+    background: rgb(255, 113, 91);
 }
 .socket.number-value {
 background: rgb(13, 104, 116);

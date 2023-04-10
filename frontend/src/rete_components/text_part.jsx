@@ -32,7 +32,7 @@ class ParagraphInput extends Rete.Component {
 
     builder(node) {
         var out1 = new Rete.Output("text", "Text", textSocket);
-        var ctrl = new ParagraphControl(this.editor, "text", node);
+        var ctrl = new ParagraphControl(this.editor, "text", node, false);
         return node.addControl(ctrl).addOutput(out1);
     }
 
@@ -186,7 +186,7 @@ class StaticTextComponent extends Rete.Component {
     node.addInput(input);
 
     // Use the StaticTextControl
-    var ctrl = new StaticTextControl(this.editor, "displayText", node);
+    var ctrl = new ParagraphControl(this.editor, "displayText", node, true, {width: 200, height: 100});
     node.addControl(ctrl);
 
     return node;
