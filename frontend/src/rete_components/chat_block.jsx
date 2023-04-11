@@ -119,7 +119,6 @@ export class ChatControlComponent extends Rete.Component {
     async onConfirmButtonClick(node) {
         const ai_model = node.data.model;
         const system_msg = node.data.system_msg;
-        const message = node.data.message;
     
         // Update the chat-output-box control with the contents of chat-input-box
         const ctrl_out = this.editor.nodes
@@ -133,13 +132,13 @@ export class ChatControlComponent extends Rete.Component {
         if (ctrl_out && ctrl_in) {
             // Get the current array of messages
             let current_messages = ctrl_out.getValue();
-            console.log("messages", current_messages);
             // If current_messages is null, undefined, or empty, set it to an empty array
             if (current_messages == null || current_messages == undefined || current_messages == "") {
               current_messages = [];
             }
             // Add the new message object to the array
             current_messages.push({ username: "User", message: ctrl_in.getValue() });
+            var message = ctrl_in.getValue();
             // Update the chat-output-box control with the new array
             ctrl_out.setValue(current_messages);
             // Clear the chat-input-box control
@@ -148,7 +147,7 @@ export class ChatControlComponent extends Rete.Component {
         this.editor.trigger("process");
 
         this.setNodeState(node, 'node_waiting_for_backend');
-    
+        console.log("message: ", message)
         try{
             node.data.response = await this.callAPI(ai_model, system_msg, message);
         } catch  (error) {
@@ -171,11 +170,11 @@ export class ChatControlComponent extends Rete.Component {
         this.setNodeState(node, 'default');
     }
   
-    async callAPI(aiModel, userMessage, messages) {
+    async callAPI(aiModel, system_msg, message) {
       let apiUrl = "http://localhost:5000/api/";
       let apiEndpoint = `llm/${aiModel}`;
   
-      let query = { "messages": messages, "user_message": userMessage };
+      let query = { "system_msg": system_msg, "message": message };
       console.log("Query to Flask backend:", query);
       console.log("API endpoint:", (apiUrl + apiEndpoint));
   
