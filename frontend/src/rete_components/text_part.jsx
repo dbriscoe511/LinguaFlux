@@ -225,16 +225,40 @@ class ChatControlComponent extends Rete.Component {
     //var userMessage = new Rete.Input("user_message", "User message", textSocket);
     var system_msg = new Rete.Input("system_msg", "System message", textSocket);
     var model = new Rete.Input("model", "Model", textSocket);
+    var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
 
     model.addControl(new DropdownControl(this.editor, "model", node, availableAssistants, false, "Model: ", defaultModel));
-    node.addControl(new ChatControl(this.editor, "messages", node));
+    node.addControl(new ChatControl(this.editor, "chat-output-box", node));
+    node.addControl(new ParagraphControl(this.editor, "chat-input-box", node, false, {width: 200, height: 100}));
 
     system_msg.addControl(new TextControl(this.editor, "system_msg", node,false, "system_msg: ", default_system_msg));
+
 
 
     return node
       .addInput(model)
       .addInput(system_msg)
+      .addControl(confirmButton);
+  }
+
+  async onConfirmButtonClick(node) {
+    const ai_model = node.data.model;
+    const system_msg = node.data.system_msg;
+    const message = node.data.message;
+
+
+    this.set_node_state(node, 'node_waiting_for_backend');
+
+    try{
+      node.data.response = await this.callAPI(ai_model, system_msg, message);
+    } catch  (error) {
+      console.error("Error calling Flask backend:", error);
+      this.set_node_state(node, 'node_processing_error');
+      node.data.response = error.message;
+    }
+    this.editor.trigger("process");
+
+    this.set_node_state(node, 'default');
   }
 
   async callAPI(aiModel, userMessage, messages) {
