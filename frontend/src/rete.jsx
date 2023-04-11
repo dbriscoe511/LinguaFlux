@@ -9,14 +9,14 @@ import Context from "efficy-rete-context-menu-plugin";
 
 //import custom parts
 import { AddComponent, NumComponent } from "./rete_components/math_part";
-import { TextComponent, ParagraphInput, StaticTextComponent, LLM_comp } from "./rete_components/text_part";
+import { TextComponent, ParagraphInput, StaticTextComponent, LLM_comp, ChatControlComponent } from "./rete_components/text_part";
 
 
 
 
 
 export async function createEditor(container) {
-  var components = [new NumComponent(), new AddComponent(), new TextComponent(), new ParagraphInput(), new StaticTextComponent(), new LLM_comp()];
+  var components = [new NumComponent(), new AddComponent(), new TextComponent(), new ParagraphInput(), new StaticTextComponent(), new LLM_comp(), new ChatControlComponent()];
 
   var editor = new Rete.NodeEditor("demo@0.1.0", container);
   editor.use(ConnectionPlugin);

@@ -2,7 +2,7 @@ import Rete from "rete";
 import axios from 'axios';
 import { dynamic_input, StringSubstitutor } from './dynamic_io';
 import { MyNode } from './MyNode';
-import {TextControl, textSocket, ParagraphControl, DropdownControl, ButtonControl} from "./controllers";
+import {TextControl, textSocket, ParagraphControl, DropdownControl, dictSocket, ButtonControl, ChatControl} from "./controllers";
 
 class TextComponent extends Rete.Component {
     //single line input, not super useful
@@ -208,4 +208,76 @@ class StaticTextComponent extends Rete.Component {
 }
 
 
-export {TextComponent,ParagraphInput,StaticTextComponent,LLM_comp};
+class ChatControlComponent extends Rete.Component {
+  constructor() {
+    super("Chat Control");
+    this.data.component = MyNode;
+  }
+
+  builder(node) {
+    let default_system_msg = "You are a helpful assistant.";
+    let availableAssistants = ["GPT3.5", "fake_assistant"];
+    let defaultModel = availableAssistants[1];
+
+    //add these back in once it is more mature. remeber to change the control to refernce the input, and not the node:
+    // ex. node.addControl vs messages.addControl
+    //var messages = new Rete.Input("messages", "Messages", dictSocket);
+    //var userMessage = new Rete.Input("user_message", "User message", textSocket);
+    var system_msg = new Rete.Input("system_msg", "System message", textSocket);
+    var model = new Rete.Input("model", "Model", textSocket);
+
+    model.addControl(new DropdownControl(this.editor, "model", node, availableAssistants, false, "Model: ", defaultModel));
+    node.addControl(new ChatControl(this.editor, "messages", node));
+
+    system_msg.addControl(new TextControl(this.editor, "system_msg", node,false, "system_msg: ", default_system_msg));
+
+
+    return node
+      .addInput(model)
+      .addInput(system_msg)
+  }
+
+  async callAPI(aiModel, userMessage, messages) {
+    let apiUrl = "http://localhost:5000/api/";
+    let apiEndpoint = `llm/${aiModel}`;
+
+    let query = { "messages": messages, "user_message": userMessage };
+    console.log("Query to Flask backend:", query);
+    console.log("API endpoint:", (apiUrl + apiEndpoint));
+
+    let updatedMessages = {};
+    try {
+      const response = await axios.post((apiUrl + apiEndpoint), query);
+      console.log("Response from Flask backend:", response);
+      updatedMessages = response.data.output;
+    } catch (error) {
+      console.error("Error calling Flask backend:", error);
+    }
+
+    return updatedMessages;
+  }
+
+  setNodeState(node, state) {
+    let instance = this.editor.nodes.find((n) => n.id === node.id);;
+    instance.setMeta({ nodeState: state });
+    instance.update();
+  }
+
+  getNodeState(node) {
+    let instance = this.editor.nodes.find((n) => n.id === node.id);;
+    return instance.meta.nodeState;
+  }
+
+  async worker(node, inputs, outputs) {
+    node.data.model = inputs["model"].length ? inputs["model"][0] : node.data.model;
+    node.data.system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
+
+    let state = this.getNodeState(node);
+    if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
+      this.setNodeState(node, 'node_waiting_for_confirmation');
+    }
+  }
+}
+
+
+export {TextComponent,ParagraphInput,StaticTextComponent,LLM_comp,ChatControlComponent};

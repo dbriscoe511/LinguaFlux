@@ -1,4 +1,6 @@
 import Rete from "rete";
+import React, { useState } from 'react';
+import {Control} from 'rete';
 
 class NumControl extends Rete.Control {
     static component = ({ value, onChange }) => (
@@ -169,8 +171,7 @@ class DropdownControl extends Rete.Control {
 }
 
   
-import React from 'react';
-import {Control} from 'rete';
+
 
 class ParagraphControl extends Control {
   static component = ({ value, onChange, readOnly, size = { width: "300px", height: "200px" } }) => (
@@ -214,11 +215,69 @@ class ParagraphControl extends Control {
   }
 }
 
+class ChatControl extends Control {
+  static component = ({ messages, onSubmit }) => {
+    const [userText, setUserText] = useState('');
 
+    const handleMessageSubmit = (e) => {
+      e.preventDefault();
+      onSubmit(userText);
+      setUserText('');
+    };
+
+    return (
+      <div className="chat-control">
+        <div className="messages">
+          {Object.entries(messages).map(([username, message], index) => (
+            <div key={index} className="message">
+              <strong>{username}:</strong> {message}
+            </div>
+          ))}
+        </div>
+        <form className="input-area" onSubmit={handleMessageSubmit}>
+          <input
+            type="text"
+            value={userText}
+            onChange={(e) => setUserText(e.target.value)}
+            className="user-input"
+          />
+          <button type="submit" className="send-button">
+            Send
+          </button>
+        </form>
+      </div>
+    );
+  };
+
+  constructor(emitter, key, node) {
+    super(key);
+    this.emitter = emitter;
+    this.key = key;
+    this.component = ChatControl.component;
+
+    const initial = node.data[key] || {};
+    node.data[key] = initial;
+    this.props = {
+      messages: initial,
+      onSubmit: (message) => {
+        // Implement message submission logic here
+        // ...
+        this.emitter.trigger("process");
+      },
+    };
+  }
+
+  setValue(val) {
+    this.props.messages = val;
+    this.putData(this.key, val);
+    this.update();
+  }
+}
 
 
 //Create all of the sockets here. A weird way to do it, but rete does not work if you create sockets in the builder function.
 const numSocket = new Rete.Socket("Number value");  
 const textSocket = new Rete.Socket("String value");  
+const dictSocket = new Rete.Socket("Dictionary value");
 
-export { NumControl, numSocket, TextControl, ParagraphControl, textSocket, DropdownControl, ButtonControl};
+export { NumControl, numSocket, TextControl, ParagraphControl, textSocket, DropdownControl, dictSocket, ButtonControl, ChatControl};
