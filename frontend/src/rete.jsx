@@ -9,7 +9,8 @@ import Context from "efficy-rete-context-menu-plugin";
 
 //import custom parts
 import { AddComponent, NumComponent } from "./rete_components/math_part";
-import { TextComponent, ParagraphInput, StaticTextComponent, LLM_comp, ChatControlComponent } from "./rete_components/text_part";
+import { TextComponent, ParagraphInput, StaticTextComponent, LLM_comp} from "./rete_components/text_part";
+import { ChatControlComponent } from "./rete_components/chat_block";
 
 
 
