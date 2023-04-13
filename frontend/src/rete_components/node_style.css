@@ -80,8 +80,8 @@ body{
 }
 
 .node.selected {
-    background: rgb(138, 131, 129);
-    border-color: #e3c000;
+    background: rgb(99, 93, 92);
+    border: 3px solid #e3c000;
 }
 
 .node .title {
@@ -110,4 +110,48 @@ body{
     font-size: small;
 }
 
+/* chat box component */
+
+.chat-control .input-area .input-wrapper {
+    display: flex;
+    font-size: small;
+    background-color: rgba(138, 131, 129);
+    border-radius: 5px;
+    border: 1px solid black;
+    padding: 5px;
+  }
+  
+  .chat-control .input-area .send-button {
+    position: relative;
+    top: 5px;
+    height: 2.5em;
+    background-color: transparent;
+    border-radius: 5px;
+    color: rgb(255, 255, 255);
+    border: none;
+  }
+  
+  .chat-control .input-area .send-button:hover {
+    background-color: rgb(167, 196, 181);
+    border: 1px solid black;
+  }
+
+  .user-input {
+    width: 400px;
+    height: 100px;
+    border: none;
+    background-color: transparent;
+    resize: none;
+    color: rgb(255, 255, 255);
+}
+
+
+.chat-control{
+    font-size: small;
+    text-align: left;
+    color: rgb(255, 255, 255);
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
+}
 

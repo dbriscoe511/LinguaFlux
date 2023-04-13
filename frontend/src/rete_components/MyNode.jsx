@@ -12,7 +12,7 @@ export class MyNode extends Node {
         case 'node_processing_error':
           return 'red';
         case 'node_waiting_for_backend':
-          return 'rgb(247, 153, 110)';
+          return 'rgb(95, 15, 64)';
         case 'node_waiting_for_confirmation':
           return 'rgb(167, 196, 181)';
         case 'ghost_node':

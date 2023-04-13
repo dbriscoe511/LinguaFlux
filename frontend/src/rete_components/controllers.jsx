@@ -228,30 +228,29 @@ class ChatControl extends Control {
     return (
       <div className="chat-control">
         <div className="messages">
-          {Object.entries(messages).map(([role, content], index) => (
+          {messages.map((message, index) => (
             <div key={index} className="message">
-              <strong>{role}:</strong> {content}
+              <strong>{message.role}:</strong> {message.content}
             </div>
           ))}
         </div>
         <form className="input-area" onSubmit={handleMessageSubmit}>
-          <textarea
-            type="text"
-            value={userText}
-            onChange={(e) => setUserText(e.target.value)}
-            className="user-input"
-            style={{
-              width: '400px',
-              height: '100px',
-            }}
-          />
-          <button type="submit" className="send-button">
-            Send
-          </button>
+          <div className="input-wrapper">
+            <textarea
+              type="text"
+              value={userText}
+              onChange={(e) => setUserText(e.target.value)}
+              className="user-input"
+            />
+            <button type="submit" className="send-button">
+              Send
+            </button>
+          </div>
         </form>
       </div>
     );
   };
+  
 
   constructor(emitter, key, node, onSubmit) {
     super(key);
@@ -259,17 +258,16 @@ class ChatControl extends Control {
     this.key = key;
     this.component = ChatControl.component;
 
-    const initial = node.data[key] || {};
+    const initial = node.data[key] || [];
     node.data[key] = initial;
     this.props = {
       messages: initial,
       onSubmit: (message) => {
         // Implement message submission logic here
         // ...
-        onSubmit(node,message);
+        onSubmit(node, message);
         this.emitter.trigger("process");
       },
-      
     };
   }
 
@@ -283,6 +281,7 @@ class ChatControl extends Control {
     return this.props.messages;
   }
 }
+
 
 
 //Create all of the sockets here. A weird way to do it, but rete does not work if you create sockets in the builder function.
