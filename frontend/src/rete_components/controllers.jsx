@@ -228,18 +228,22 @@ class ChatControl extends Control {
     return (
       <div className="chat-control">
         <div className="messages">
-          {Object.entries(messages).map(([username, message], index) => (
+          {Object.entries(messages).map(([role, content], index) => (
             <div key={index} className="message">
-              <strong>{username}:</strong> {message}
+              <strong>{role}:</strong> {content}
             </div>
           ))}
         </div>
         <form className="input-area" onSubmit={handleMessageSubmit}>
-          <input
+          <textarea
             type="text"
             value={userText}
             onChange={(e) => setUserText(e.target.value)}
             className="user-input"
+            style={{
+              width: '400px',
+              height: '100px',
+            }}
           />
           <button type="submit" className="send-button">
             Send
@@ -249,7 +253,7 @@ class ChatControl extends Control {
     );
   };
 
-  constructor(emitter, key, node) {
+  constructor(emitter, key, node, onSubmit) {
     super(key);
     this.emitter = emitter;
     this.key = key;
@@ -262,8 +266,10 @@ class ChatControl extends Control {
       onSubmit: (message) => {
         // Implement message submission logic here
         // ...
+        onSubmit(node,message);
         this.emitter.trigger("process");
       },
+      
     };
   }
 
@@ -271,6 +277,10 @@ class ChatControl extends Control {
     this.props.messages = val;
     this.putData(this.key, val);
     this.update();
+  }
+
+  getValue() {
+    return this.props.messages;
   }
 }
 
