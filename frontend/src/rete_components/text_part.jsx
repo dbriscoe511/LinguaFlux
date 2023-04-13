@@ -126,8 +126,9 @@ class LLM_comp extends Rete.Component {
     async callAPI(ai_model, system_msg, message) {
       let api_url = "http://localhost:5000/api/";
       let api_endpoint = `llm/${ai_model}`;
-  
-      let query = { "system_msg": system_msg, "message": message };
+      
+      
+      let query = { "system_msg": system_msg, "messages": [{ role: "user", content: message }] };
       console.log("Query to Flask backend:", query);
       console.log("API endpoint:", (api_url + api_endpoint));
   
@@ -136,6 +137,7 @@ class LLM_comp extends Rete.Component {
         const response = await axios.post((api_url + api_endpoint), query);
         console.log("Response from Flask backend:", response);
         stringy = response.data.output;
+        console.log("Response from Flask backend data:", stringy);
       } catch (error) {
         console.error("Error calling Flask backend:", error);
       }

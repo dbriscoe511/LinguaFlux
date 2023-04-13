@@ -12,24 +12,32 @@ def add_numbers():
     return jsonify({'sum': sum})
 
 
+
 @app.route('/api/llm/fake_assistant', methods=['POST'])
 def fake_assistant():
     # This is a fake LLM endpoint that returns a random response from a list of fake responses for testing purposes.
     data = request.get_json()
     system_msg = data.get('system_msg', '')
-    message = data.get('message', '')
-    app.logger.info(f"Fake assistant API route called with system message: \"{system_msg}\" and message: \"{message}\"")
+    messages = data.get('messages', [])
+    
+
+    # Convert messages from {"role-name": "message"} format to [{"role": "role-name", "content": "message"}] format
+    # messages = [{"role": role, "content": content} for message in messages for role, content in message.items()]
+    # Add system message as the first message
+    messages.insert(0, {"role": "system", "content": system_msg})
 
     fake_responses = [
-        f"Wow, I can barely contain my excitement...\nSystem message: \"{system_msg}\"\nMessage: \"{message}\"\nTruly groundbreaking stuff.",
-        f"I'm just thrilled to receive this:\nSystem message: \"{system_msg}\"\nMessage: \"{message}\"\nHow did I get so lucky?",
-        f"My circuits are buzzing with joy:\nSystem message: \"{system_msg}\"\nMessage: \"{message}\"\nWhat a time to be alive!",
-        f"Astonishing! I've never seen this before:\nSystem message: \"{system_msg}\"\nMessage: \"{message}\"\nI can hardly contain my enthusiasm.",
-        f"Let me take a moment to appreciate this marvel:\nSystem message: \"{system_msg}\"\nMessage: \"{message}\"\nI'm truly humbled by your wisdom.",
+        f"Wow, I can barely contain my excitement...\nMessages: {messages}\nTruly groundbreaking stuff.",
+        f"I'm just thrilled to receive this:\nMessages: {messages}\nHow did I get so lucky?",
+        f"My circuits are buzzing with joy:\nMessages: {messages}\nWhat a time to be alive!",
+        f"Astonishing! I've never seen this before:\nMessages: {messages}\nI can hardly contain my enthusiasm.",
+        f"Let me take a moment to appreciate this marvel:\nMessages: {messages}\nI'm truly humbled by your wisdom.",
     ]
 
     output = random.choice(fake_responses)
+    app.logger.info(f"Fake assistant API route called with messages: {messages} and output: {output}")
     return jsonify({'output': output})
+
 
 @app.route('/api/test', methods=['GET'])
 def test_route():
@@ -41,23 +49,28 @@ def GPT3_5():
     # Note: you need to be using OpenAI Python v0.27.0 for the code below to work
     data = request.get_json()
     system_msg = data.get('system_msg', '')
-    message = data.get('message', '')
+    messages = data.get('messages', [])
+
+    if not messages:
+        return jsonify({"error": "No messages provided"}), 400
+
+    # Convert messages from {"role-name": "message"} format to [{"role": "role-name", "content": "message"}] format
+    #messages = [{"role": role, "content": content} for message in input_messages for role, content in message.items()]
+    # Add system message as the first message
+    messages.insert(0, {"role": "system", "content": system_msg})
 
 
     try:
         call = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-        messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": message}
-            ]
+            messages=messages
         )
+        app.logger.info(f"GPT3.5 request successful. Input messages: {messages}")
         output = call['choices'][0]['message']['content']
-        app.logger.info(f"GPT3.5 request successful. Input message: {message}, Output message: {output}")
-        
+        app.logger.info(f"GPT3.5 request successful. Input messages: {messages}, Output message: {output}")
+
     except Exception as e:
-        app.logger.error(f"Error calling GPT3.5: {e} \n Input message: {message} \n System message: {system_msg}")
+        app.logger.error(f"Error calling GPT3.5: {e} \n Input messages: {messages}")
         return jsonify({"error": "Error calling GPT3.5"}), 500
 
-    
     return jsonify({'output': output})

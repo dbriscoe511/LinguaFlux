@@ -68,7 +68,7 @@ class ChatOutputControl extends ParagraphControl {
     parseDictionaryToText(messagesArray) {
         let text = "";
         for (const messageObj of messagesArray) {
-          text += `${messageObj.username}: ${messageObj.message}\n---\n`;
+          text += `${messageObj.role}: ${messageObj.content}\n---\n`;
         }
         return text;
     }
@@ -131,14 +131,13 @@ export class ChatControlComponent extends Rete.Component {
 
         if (ctrl_out && ctrl_in) {
             // Get the current array of messages
-            let current_messages = ctrl_out.getValue();
+            var current_messages = ctrl_out.getValue();
             // If current_messages is null, undefined, or empty, set it to an empty array
             if (current_messages == null || current_messages == undefined || current_messages == "") {
               current_messages = [];
             }
             // Add the new message object to the array
-            current_messages.push({ username: "User", message: ctrl_in.getValue() });
-            var message = ctrl_in.getValue();
+            current_messages.push({ role: "user", content: ctrl_in.getValue() });
             // Update the chat-output-box control with the new array
             ctrl_out.setValue(current_messages);
             // Clear the chat-input-box control
@@ -147,9 +146,9 @@ export class ChatControlComponent extends Rete.Component {
         this.editor.trigger("process");
 
         this.setNodeState(node, 'node_waiting_for_backend');
-        console.log("message: ", message)
+        
         try{
-            node.data.response = await this.callAPI(ai_model, system_msg, message);
+            node.data.response = await this.callAPI(ai_model, system_msg, current_messages);
         } catch  (error) {
             console.error("Error calling Flask backend:", error);
             this.setNodeState(node, 'node_processing_error');
@@ -160,7 +159,7 @@ export class ChatControlComponent extends Rete.Component {
         if(ctrl_out){
             let current_messages = ctrl_out.getValue();
             //Add the new message to the dictionary
-            current_messages.push({ username: ai_model, message: node.data.response });
+            current_messages.push({ role: "assistant", content: node.data.response });
             //Update the chat-output-box control with the new dictionary
             ctrl_out.setValue(current_messages);
         }
@@ -174,7 +173,7 @@ export class ChatControlComponent extends Rete.Component {
       let apiUrl = "http://localhost:5000/api/";
       let apiEndpoint = `llm/${aiModel}`;
   
-      let query = { "system_msg": system_msg, "message": message };
+      let query = { "system_msg": system_msg, "messages": message };
       console.log("Query to Flask backend:", query);
       console.log("API endpoint:", (apiUrl + apiEndpoint));
   
