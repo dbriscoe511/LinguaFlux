@@ -1,5 +1,5 @@
 import Rete from "rete";
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {Control} from 'rete';
 
 class NumControl extends Rete.Control {
@@ -216,8 +216,10 @@ class ParagraphControl extends Control {
 }
 
 class ChatControl extends Control {
-  static component = ({ messages, onSubmit }) => {
+  static component = ({ messages, onSubmit, editor }) => {
     const [userText, setUserText] = useState('');
+    const chatControlRef = useRef(null);
+    const [isResizing, setIsResizing] = useState(false);
 
     const handleMessageSubmit = (e) => {
       e.preventDefault();
@@ -225,13 +227,54 @@ class ChatControl extends Control {
       setUserText('');
     };
 
+    const handleResizeMouseDown = (e) => {
+      e.preventDefault();
+      e.stopPropagation(); // Add this line
+      //e.stopImmediatePropagation();
+      setIsResizing(true); // Add this line
+      //this.editor.isResizing = true; // Add this line
+
+      const chatControlElement = chatControlRef.current;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startWidth = parseInt(
+        document.defaultView.getComputedStyle(chatControlElement).width,
+        10
+      );
+      const startHeight = parseInt(
+        document.defaultView.getComputedStyle(chatControlElement).height,
+        10
+      );
+
+      const doResize = (e) => {
+        chatControlElement.style.width = startWidth + e.clientX - startX + "px";
+        chatControlElement.style.height = startHeight + e.clientY - startY + "px";
+      };
+
+      const stopResize = () => {
+        window.removeEventListener("mousemove", doResize);
+        window.removeEventListener("mouseup", stopResize);
+        setIsResizing(false); // Add this line
+        //this.editor.isResizing = false; // Add this line
+      };
+
+      window.addEventListener("mousemove", doResize);
+      window.addEventListener("mouseup", stopResize);
+    };
+
     return (
-      <div className="chat-control">
+      <div
+      className={`chat-control${isResizing ? " resizing" : ""}`}
+      ref={chatControlRef}
+      >
         <div className="messages">
           {messages.map((message, index) => (
-            <div key={index} className="message">
-              <strong>{message.role}:</strong> {message.content}
-            </div>
+            <React.Fragment key={index}>
+              <div className="message">
+                <strong>{message.role}:</strong> {message.content}
+              </div>
+              {index < messages.length - 1 && <hr className="message-divider" />}
+            </React.Fragment>
           ))}
         </div>
         <form className="input-area" onSubmit={handleMessageSubmit}>
@@ -247,6 +290,7 @@ class ChatControl extends Control {
             </button>
           </div>
         </form>
+        <div className="resize-handle" onMouseDown={handleResizeMouseDown}></div>
       </div>
     );
   };
@@ -256,7 +300,11 @@ class ChatControl extends Control {
     super(key);
     this.emitter = emitter;
     this.key = key;
+    //this.editor = editor;
     this.component = ChatControl.component;
+    
+    //this.editor.isResizing = true;
+    //console.log(this.editor);
 
     const initial = node.data[key] || [];
     node.data[key] = initial;

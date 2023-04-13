@@ -32,6 +32,8 @@ export async function createEditor(container) {
   editor.use(ReactRenderPlugin, { createRoot });
   editor.use(Context);
 
+  editor.isResizing = false; // Add this line
+
   var engine = new Rete.Engine("demo@0.1.0");
 
   components.map((c) => {

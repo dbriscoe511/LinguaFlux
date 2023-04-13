@@ -27,11 +27,11 @@ def fake_assistant():
     messages.insert(0, {"role": "system", "content": system_msg})
 
     fake_responses = [
-        f"Wow, I can barely contain my excitement...\nMessages: {messages}\nTruly groundbreaking stuff.",
-        f"I'm just thrilled to receive this:\nMessages: {messages}\nHow did I get so lucky?",
-        f"My circuits are buzzing with joy:\nMessages: {messages}\nWhat a time to be alive!",
-        f"Astonishing! I've never seen this before:\nMessages: {messages}\nI can hardly contain my enthusiasm.",
-        f"Let me take a moment to appreciate this marvel:\nMessages: {messages}\nI'm truly humbled by your wisdom.",
+        f"Wow, I can barely contain my excitement...\nMessages: {messages[-1]}\nTruly groundbreaking stuff.",
+        f"I'm just thrilled to receive this:\nMessages: {messages[-1]}\nHow did I get so lucky?",
+        f"My circuits are buzzing with joy:\nMessages: {messages[-1]}\nWhat a time to be alive!",
+        f"Astonishing! I've never seen this before:\nMessages: {messages[-1]}\nI can hardly contain my enthusiasm.",
+        f"Let me take a moment to appreciate this marvel:\nMessages: {messages[-1]}\nI'm truly humbled by your wisdom.",
     ]
 
     output = random.choice(fake_responses)

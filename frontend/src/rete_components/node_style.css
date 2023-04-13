@@ -149,9 +149,34 @@ body{
 .chat-control{
     font-size: small;
     text-align: left;
+    min-width: 400px;
+    max-width: 600px;
+    min-height: 100px;
+    resize: both;
     color: rgb(255, 255, 255);
     border: 1px solid black;
     border-radius: 5px;
     padding: 5px;
 }
+.message {
+    overflow: auto;
+}
+
+.chat-control .resize-handle {
+    width: 16px;
+    height: 16px;
+    background: url("data:image/svg+xml,%3Csvg width='32' height='32' viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M22.667 8L24 9.333l-6.333 6.334L16 14zm-2.667 2.667l3.333-3.334L21.333 10l-3.333 3.333zm-6 6l-6.333 6.333L8 22.667l6.333-6.333zm-2.667 2.667l3.333-3.333-1.333-1.334-3.333 3.333z' fill='%23000' fill-rule='evenodd'/%3E%3C/svg%3E");
+    background-size: 16px 16px;
+    cursor: nwse-resize;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 1;
+}
+
+/* disable node dragging when it is being resized */
+.chat-control.resizing * {
+    pointer-events: none;
+  } 
+  
 
