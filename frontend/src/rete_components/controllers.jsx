@@ -226,18 +226,18 @@ class ChatControl extends Control {
     };
 
     return (
-      <div
-      className={`chat-control`}
-      >
-        <div className="messages">
-          {messages.map((message, index) => (
-            <React.Fragment key={index}>
-              <div className="message">
-                <strong>{message.role}:</strong> {message.content}
-              </div>
-              {index < messages.length - 1 && <hr className="message-divider" />}
-            </React.Fragment>
-          ))}
+      <div className={`chat-control`}>
+        <div className="messages-wrapper">
+          <div className="messages">
+            {messages.map((message, index) => (
+              <React.Fragment key={index}>
+                <div className="message">
+                  <strong>{message.role}:</strong> {message.content}
+                </div>
+                {index < messages.length - 1 && <hr className="message-divider" />}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
         <form className="input-area" onSubmit={handleMessageSubmit}>
           <div className="input-wrapper">
