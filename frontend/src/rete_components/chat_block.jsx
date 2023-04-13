@@ -18,10 +18,11 @@ export class ChatControlComponent extends Rete.Component {
 
     //add these back in once it is more mature. remeber to change the control to refernce the input, and not the node:
     // ex. node.addControl vs messages.addControl
-    //var messages = new Rete.Input("messages", "Messages", dictSocket);
-    //var userMessage = new Rete.Input("user_message", "User message", textSocket);
+    var messages = new Rete.Input("messages", "Chat override", dictSocket);
+    var userMessage = new Rete.Input("user_message", "User message override", textSocket);
     var system_msg = new Rete.Input("system_msg", "System message", textSocket);
     var model = new Rete.Input("model", "Model", textSocket);
+    var chat_output = new Rete.Output("chat_output", "Full Chat", dictSocket);
     //var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
 
     model.addControl(new DropdownControl(this.editor, "model", node, availableAssistants, false, "Model: ", defaultModel));
@@ -29,10 +30,49 @@ export class ChatControlComponent extends Rete.Component {
     system_msg.addControl(new TextControl(this.editor, "system_msg", node,false, "system_msg: ", default_system_msg));
     node.addControl(new ChatControl(this.editor, "chat-box", node, this.onChatSend.bind(this)));
 
+    node.addControl(new ButtonControl(this.editor, "Send chat overide", node, this.onChatOverrideClick.bind(this)), "Send chat overide");
+    node.addControl(new ButtonControl(this.editor, "Send message overide", node, this.onMsgOverideClick.bind(this)),"Send message overide");
+    node.addControl(new ButtonControl(this.editor, "Clear chat", node, this.onClearClick.bind(this)), "Clear-chat");
+
     return node
       .addInput(model)
       .addInput(system_msg)
+      .addInput(userMessage)
+      .addInput(messages)
+      .addOutput(chat_output);
   }
+
+  onChatOverrideClick(node) {
+    const overide_messages = node.data.overide_messages;
+
+    const ctrl = this.editor.nodes
+    .find((n) => n.id === node.id)
+    .controls.get("chat-box");
+
+    if (ctrl) {
+        // Get the current array of messages
+        var current_messages = ctrl.getValue();
+        // Add the new message object to the array
+        current_messages.push({ role: "user", content: message });
+        // Update the chat-output-box control with the new array
+        ctrl.setValue(overide_messages);
+    }
+  }
+  
+  onMsgOverideClick(node) {
+    const overide_message = node.data.overide_message;
+  }
+
+  onClearClick(node) {
+    const ctrl = this.editor.nodes
+    .find((n) => n.id === node.id)
+    .controls.get("chat-box");
+
+    if (ctrl) {
+        ctrl.setValue([]);
+    }
+  }
+
 
   async onChatSend(node,message) {
     

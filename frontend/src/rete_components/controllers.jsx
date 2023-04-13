@@ -44,7 +44,6 @@ class NumControl extends Rete.Control {
 class ButtonControl extends Rete.Control {
   static component = ({ label, onClick }) => (
     <div>
-      {label && <label>{label}</label>}
       <button
         className="default-text-item"
         onClick={onClick}
@@ -53,15 +52,16 @@ class ButtonControl extends Rete.Control {
             ref.addEventListener("pointerdown", (e) => e.stopPropagation());
         }}
       >
-        Confirm
+        {label}
       </button>
     </div>
   );
 
-  constructor(emitter, key, node, onClick, label = null) {
+  constructor(emitter, key, node, onClick, label) {
     super(key);
     this.emitter = emitter;
     this.key = key;
+    label = label || key;
     this.component = ButtonControl.component;
 
     this.props = {
