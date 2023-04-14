@@ -218,6 +218,9 @@ class ParagraphControl extends Control {
 class ChatControl extends Control {
   static component = ({ messages, onSubmit, addBreakPoint }) => {
     const [userText, setUserText] = useState('');
+    const [editedMessageIndex, setEditedMessageIndex] = useState(null);
+    const [editedMessageValue, setEditedMessageValue] = useState('');
+
 
     const handleMessageSubmit = (e) => {
       e.preventDefault();
@@ -227,13 +230,34 @@ class ChatControl extends Control {
 
     const handleEditButtonClick = (index) => {
       //console.log("Edit button clicked for user message at index:", index);
-
+      setEditedMessageIndex(index);
+      setEditedMessageValue(messages[index].content);
     };
     
     const handleIndexButtonClick = (index) => {
       //console.log("Index button clicked for assistant message at index:", index);
       addBreakPoint(index);
     };
+
+    const handleEditSubmit = () => {
+      const updatedMessages = messages;
+      //updatedMessages[editedMessageIndex].content = editedMessageValue;
+      console.log("editedMessageValue: ", editedMessageValue);
+
+      //remove any messages after the edited message
+      messages = updatedMessages.splice(editedMessageIndex);
+      
+      //add the edited message
+      onSubmit(editedMessageValue);
+      setEditedMessageIndex(null);
+      setEditedMessageValue('');
+    };
+    
+    const handleEditCancel = () => {
+      setEditedMessageIndex(null);
+      setEditedMessageValue('');
+    };
+    
     
 
     return (
@@ -243,9 +267,26 @@ class ChatControl extends Control {
             {messages.map((message, index) => (
               <React.Fragment key={index}>
                 <div className="message">
-                  <div>
-                    <strong>{message.role}:</strong> {message.content}
-                  </div>
+                  {editedMessageIndex === index ? (
+                    <div>
+                      <textarea
+                        type="text"
+                        value={editedMessageValue}
+                        onChange={(e) => setEditedMessageValue(e.target.value)}
+                        className="message-input"
+                      />
+                      <button className="submit-edit-button" onClick={handleEditSubmit}>
+                        Submit
+                      </button>
+                      <button className="cancel-edit-button" onClick={handleEditCancel}>
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <strong>{message.role}:</strong> {message.content}
+                    </div>
+                  )}
                   {message.role === "user" ? (
                     <button
                       className="edit-button"
@@ -257,15 +298,15 @@ class ChatControl extends Control {
                     <button
                       className="index-button"
                       onClick={() => handleIndexButtonClick(index)}
-                    > {index}
+                    >
+                      {index}
                     </button>
                   )}
                 </div>
-                {index < messages.length - 1 && (
-                  <hr className="message-divider" />
-                )}
+                {index < messages.length - 1 && <hr className="message-divider" />}
               </React.Fragment>
-            ))}
+          ))}
+
           </div>
         </div>
         <form className="input-area" onSubmit={handleMessageSubmit}>
