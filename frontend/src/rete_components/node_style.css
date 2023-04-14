@@ -19,13 +19,13 @@
     background: rgb(255, 113, 91);
 }
 .socket.number-value {
-background: rgb(13, 104, 116);
+    background: rgb(13, 104, 116);
 }
-.socket.array {
-background: rgb(49, 0, 68);
+.socket.dictionary-value {
+    background: rgb(49, 0, 68);
 }
 .socket.default {
-background: grey;
+    background: grey;
 }
 
 /* connections */
@@ -110,6 +110,22 @@ body{
     font-size: small;
 }
 
+.default-button{
+    background: rgba(138, 131, 129);
+    border-color:rgb(71, 67, 66);
+    color: rgb(255, 255, 255);
+    border-radius: 5px;
+    font-size: small;
+}
+
+.default-button:hover{
+    background: rgb(167, 196, 181);
+    border-color:rgb(71, 67, 66);
+    color: rgb(255, 255, 255);
+    border-radius: 5px;
+    font-size: small;
+}
+
 /* chat box component */
 
 .chat-control .input-area .input-wrapper {
@@ -121,7 +137,7 @@ body{
     padding: 5px;
   }
   
-  .chat-control .input-area .send-button {
+.chat-control .input-area .send-button {
     position: relative;
     top: 5px;
     height: 2.5em;
@@ -129,17 +145,20 @@ body{
     border-radius: 5px;
     color: rgb(255, 255, 255);
     border: none;
-  }
+}
   
-  .chat-control .input-area .send-button:hover {
+.chat-control .input-area .send-button:hover,
+.chat-control .edit-button:hover,
+.chat-control .submit-edit-button:hover{
     background-color: rgb(167, 196, 181);
     border: 2px solid black;
-  }
+}
 
-  .user-input {
+.chat-control .user-input {
     flex-grow: 1;
     width: fit-content;
-    height: 100px;
+    height: auto;
+    max-height: 110px;
     border: none;
     background-color: transparent;
     resize: none;
@@ -172,7 +191,69 @@ body{
     flex-direction: column;
     overflow: auto;
     position: relative;
+}
+
+.chat-control .edit-button,
+.chat-control .index-button {
+    visibility: hidden;
+    margin-left: 8px;
+}
+
+.chat-control .message:hover .edit-button,
+.chat-control .message:hover .index-button {
+  visibility: visible;
+}
+
+.chat-control .message {
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    margin: 5px;
+    padding: 5px;
   }
+
+.chat-control .index-button,
+.chat-control .edit-button {
+    background-color: rgb(138, 131, 129);
+    color: white;
+    border-radius: 5px;
+    font-size: larger;
+    border: 2px transparent;
+}
+
+.chat-control .edit-input{
+    background: rgba(138, 131, 129);
+    border-color:rgb(71, 67, 66);
+    color: rgb(255, 255, 255);
+    border-radius: 5px;
+    font-size: small;
+    width: 100%;
+    flex-grow: 1;
+    height: auto;
+    min-height: 1.2em;
+    resize: none;
+    overflow: hidden;
+    padding: 4px;
+    margin: 5px;
+}
+
+.chat-control .edit-area{
+    flex-grow: 1;
+    margin: 5px;
+    padding: 10px;
+
+}
+
+.chat-control .index-button:hover {
+    background-color: rgb(49, 0, 68);
+    border: 2px solid black;
+}
+
+
+
+
 
 
   

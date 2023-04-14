@@ -45,7 +45,7 @@ class ButtonControl extends Rete.Control {
   static component = ({ label, onClick }) => (
     <div>
       <button
-        className="default-text-item"
+        className="default-button"
         onClick={onClick}
         ref={(ref) => {
           ref &&
@@ -240,13 +240,14 @@ class ChatControl extends Control {
     };
 
     const handleEditSubmit = () => {
+      //this button pops up when the user clicks the edit button
       const updatedMessages = messages;
       //updatedMessages[editedMessageIndex].content = editedMessageValue;
       console.log("editedMessageValue: ", editedMessageValue);
 
       //remove any messages after the edited message
       messages = updatedMessages.splice(editedMessageIndex);
-      
+
       //add the edited message
       onSubmit(editedMessageValue);
       setEditedMessageIndex(null);
@@ -254,6 +255,7 @@ class ChatControl extends Control {
     };
     
     const handleEditCancel = () => {
+      //this button pops up when the user clicks the edit button
       setEditedMessageIndex(null);
       setEditedMessageValue('');
     };
@@ -268,17 +270,17 @@ class ChatControl extends Control {
               <React.Fragment key={index}>
                 <div className="message">
                   {editedMessageIndex === index ? (
-                    <div>
+                    <div className="edit-area">
                       <textarea
                         type="text"
                         value={editedMessageValue}
                         onChange={(e) => setEditedMessageValue(e.target.value)}
-                        className="message-input"
+                        className="edit-input"
                       />
-                      <button className="submit-edit-button" onClick={handleEditSubmit}>
+                      <button className="default-button" onClick={handleEditSubmit}>
                         Submit
                       </button>
-                      <button className="cancel-edit-button" onClick={handleEditCancel}>
+                      <button className="default-button" onClick={handleEditCancel}>
                         Cancel
                       </button>
                     </div>
