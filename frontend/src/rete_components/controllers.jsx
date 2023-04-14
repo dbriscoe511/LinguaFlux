@@ -226,12 +226,28 @@ class ChatControl extends Control {
       e.preventDefault();
       onSubmit(userText);
       setUserText('');
+
+      // Adjust the height of the user-input textarea
+      setTimeout(() => {
+        const userInput = document.querySelector('.user-input');
+        if (userInput) {
+          adjustHeight(userInput);
+        }
+      }, 10);
     };
 
     const handleEditButtonClick = (index) => {
       //console.log("Edit button clicked for user message at index:", index);
       setEditedMessageIndex(index);
       setEditedMessageValue(messages[index].content);
+
+      //wait for the edit input to appear, then adjust its height
+      setTimeout(() => {
+        const editInput = document.querySelector('.edit-input');
+        if (editInput) {
+          adjustHeight(editInput);
+        }
+      }, 10);
     };
     
     const handleIndexButtonClick = (index) => {
@@ -259,6 +275,12 @@ class ChatControl extends Control {
       setEditedMessageIndex(null);
       setEditedMessageValue('');
     };
+
+    const adjustHeight = (textarea) => {
+      //css cannot do this automatically, so we have to do it manually
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    };
     
     
 
@@ -275,6 +297,7 @@ class ChatControl extends Control {
                         type="text"
                         value={editedMessageValue}
                         onChange={(e) => setEditedMessageValue(e.target.value)}
+                        onInput={(e) => adjustHeight(e.target)}
                         className="edit-input"
                       />
                       <button className="default-button" onClick={handleEditSubmit}>
@@ -317,6 +340,7 @@ class ChatControl extends Control {
               type="text"
               value={userText}
               onChange={(e) => setUserText(e.target.value)}
+              onInput={(e) => adjustHeight(e.target)}
               className="user-input"
             />
             <button type="submit" className="send-button">
