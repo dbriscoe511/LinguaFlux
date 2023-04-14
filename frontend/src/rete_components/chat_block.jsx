@@ -1,6 +1,6 @@
 import Rete from "rete";
 import axios from 'axios';
-import { dynamic_input, StringSubstitutor } from './dynamic_io';
+import { dynamic_input, dynamic_output, StringSubstitutor } from './dynamic_io';
 import { MyNode } from './MyNode';
 import {TextControl, textSocket, ParagraphControl, DropdownControl, dictSocket, ButtonControl,ChatControl} from "./controllers";
 
@@ -29,7 +29,7 @@ export class ChatControlComponent extends Rete.Component {
     model.addControl(new DropdownControl(this.editor, "model", node, availableAssistants, false, "Model: ", defaultModel));
 
     system_msg.addControl(new TextControl(this.editor, "system_msg", node,false, "system_msg: ", default_system_msg));
-    node.addControl(new ChatControl(this.editor, "chat-box", node, this.onChatSend.bind(this)));
+    node.addControl(new ChatControl(this.editor, "chat-box", node, this.onChatSend.bind(this), this.addBreakPoint.bind(this)));
 
     node.addControl(new ButtonControl(this.editor, "Send chat overide", node, this.onChatOverrideClick.bind(this)), "Send chat overide");
     node.addControl(new ButtonControl(this.editor, "Send message overide", node, this.onMsgOverideClick.bind(this)),"Send message overide");
@@ -59,6 +59,28 @@ export class ChatControlComponent extends Rete.Component {
       }
     }
   }
+
+  addBreakPoint(node,index) {
+    console.log("Breakpoint added at index:", index);
+    //create node.data.breakpoints if it doesn't exist
+    if (!node.data.breakpoints) {
+      node.data.breakpoints = [];
+    }
+    //add the breakpoint to the node if it doesn't already exist
+    if (!node.data.breakpoints.includes(index)) {
+      node.data.breakpoints.push(index);
+    }
+    //sort the breakpoints
+    node.data.breakpoints.sort(function(a, b){return a-b});
+    //create the names in the format "breakpoint {index}"
+    let brake_names = [];
+    for (let i = 0; i < node.data.breakpoints.length; i++) {
+      brake_names.push("breakpoint " + node.data.breakpoints[i]);
+    }
+    //add the breakpoints as an output
+    dynamic_output(node.id,node.data.breakpoints.length,this.editor,dictSocket,brake_names);
+
+  }
   
   onMsgOverideClick(node) {
     const overide_message = node.data.overide_message;
@@ -74,6 +96,11 @@ export class ChatControlComponent extends Rete.Component {
     if (ctrl) {
         ctrl.setValue([]);
     }
+
+    //remove all the breakpoints
+    node.data.breakpoints = [];
+    //remove all the outputs
+    dynamic_output(node.id,0,this.editor,dictSocket,[]);
   }
 
 
@@ -167,6 +194,13 @@ export class ChatControlComponent extends Rete.Component {
     if (ctrl) {
       outputs["chat_output"] = ctrl.getValue();
       outputs["last_response"] = node.data.response;
+
+      // add data to the breakpoints. the breakpoint gets the chat output up to the index
+      if (node.data.breakpoints) {
+        for (let i = 0; i < node.data.breakpoints.length; i++) {
+          outputs["dyn_out" + i] = ctrl.getValue().slice(0,node.data.breakpoints[i]+1);
+        }
+      }
     }
     node.data.model = inputs["model"].length ? inputs["model"][0] : node.data.model;
     node.data.system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;

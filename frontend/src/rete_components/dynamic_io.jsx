@@ -1,6 +1,68 @@
 import Rete from "rete";
 
 
+export function dynamic_output(nodeId, desired_outputs, editor, socket, output_titles = []) {
+  /**
+   * This function dynamically updates the outputs of a node based on the desired number of outputs.
+   * It adds new outputs or removes extra outputs accordingly, and updates the node's appearance in the editor.
+   *
+   * @param {string|number} nodeId - The ID of the node to update.
+   * @param {number} desired_outputs - The desired number of outputs for the node.
+   * @param {Rete.Editor} editor - The Rete.js editor instance.
+   * @param {Rete.Socket} socket - The socket to use for the new outputs.
+   * @param {Array} output_titles - An array of output titles. Default is an empty array.
+   */
+
+  // Find the node instance
+  const nodeInstance = editor.nodes.find((n) => n.id === nodeId);
+
+  // Count the existing dynamic outputs
+  let existingDynamicOutputs = 0;
+  nodeInstance.outputs.forEach((output, key) => {
+      if (key.startsWith("dyn_out")) {
+        existingDynamicOutputs += 1;
+      }
+  });
+
+  // Create output titles if needed
+  if (output_titles.length < desired_outputs) {
+      for (let i = output_titles.length; i < desired_outputs; i++) {
+          output_titles.push("Output " + i);
+      }
+  }
+
+  // Add new dynamic outputs if needed
+  for (let i = existingDynamicOutputs; i < desired_outputs; i++) {
+      const out = new Rete.Output("dyn_out" + i, output_titles[i], socket);
+      nodeInstance.addOutput(out);
+      console.log("dynamic_output added output", out);
+  }
+
+  // Remove extra dynamic outputs if needed
+  for (let i = existingDynamicOutputs; i > desired_outputs; i--) {
+      const outputToRemove = nodeInstance.outputs.get("dyn_out" + (i - 1));
+      console.log("output to remove", outputToRemove);
+
+      // Manually remove connections before removing the output
+      outputToRemove.connections.forEach((connection) => {
+          // Remove connection from the output side
+          outputToRemove.removeConnection(connection);
+          
+          // Remove connection from the input side
+          const inputNode = connection.input.node;
+          const inputKey = connection.input.key;
+          inputNode.inputs.get(inputKey).removeConnection(connection);
+
+          // Force a re-render
+          editor.trigger('process');
+      });
+
+      nodeInstance.removeOutput(outputToRemove);
+  }
+
+  // Update the node's appearance in the editor, and force a re-render
+  nodeInstance.update();
+}
 
 export function dynamic_input(nodeId, desired_inputs, editor, socket, ControlConstructor, input_titles = []) {
     /**

@@ -216,7 +216,7 @@ class ParagraphControl extends Control {
 }
 
 class ChatControl extends Control {
-  static component = ({ messages, onSubmit}) => {
+  static component = ({ messages, onSubmit, addBreakPoint }) => {
     const [userText, setUserText] = useState('');
 
     const handleMessageSubmit = (e) => {
@@ -225,6 +225,17 @@ class ChatControl extends Control {
       setUserText('');
     };
 
+    const handleEditButtonClick = (index) => {
+      //console.log("Edit button clicked for user message at index:", index);
+
+    };
+    
+    const handleIndexButtonClick = (index) => {
+      //console.log("Index button clicked for assistant message at index:", index);
+      addBreakPoint(index);
+    };
+    
+
     return (
       <div className={`chat-control`}>
         <div className="messages-wrapper">
@@ -232,9 +243,27 @@ class ChatControl extends Control {
             {messages.map((message, index) => (
               <React.Fragment key={index}>
                 <div className="message">
-                  <strong>{message.role}:</strong> {message.content}
+                  <div>
+                    <strong>{message.role}:</strong> {message.content}
+                  </div>
+                  {message.role === "user" ? (
+                    <button
+                      className="edit-button"
+                      onClick={() => handleEditButtonClick(index)}
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    <button
+                      className="index-button"
+                      onClick={() => handleIndexButtonClick(index)}
+                    > {index}
+                    </button>
+                  )}
                 </div>
-                {index < messages.length - 1 && <hr className="message-divider" />}
+                {index < messages.length - 1 && (
+                  <hr className="message-divider" />
+                )}
               </React.Fragment>
             ))}
           </div>
@@ -255,28 +284,26 @@ class ChatControl extends Control {
       </div>
     );
   };
-  
 
-  constructor(emitter, key, node, onSubmit) {
+  constructor(emitter, key, node, onSubmit, addBreakPoint) {
     super(key);
     this.emitter = emitter;
     this.key = key;
-    //this.editor = editor;
     this.component = ChatControl.component;
-    
-    //this.editor.isResizing = true;
-    //console.log(this.editor);
 
     const initial = node.data[key] || [];
     node.data[key] = initial;
     this.props = {
       messages: initial,
       onSubmit: (message) => {
-        // Implement message submission logic here
-        // ...
         onSubmit(node, message);
         this.emitter.trigger("process");
       },
+      addBreakPoint: (index) => {
+        addBreakPoint(node, index);
+        this.emitter.trigger("process");
+      },
+      
     };
   }
 
@@ -290,6 +317,7 @@ class ChatControl extends Control {
     return this.props.messages;
   }
 }
+
 
 
 
