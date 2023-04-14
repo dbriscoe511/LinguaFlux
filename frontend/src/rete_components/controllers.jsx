@@ -1,6 +1,8 @@
 import Rete from "rete";
 import React, { useState, useRef } from 'react';
 import {Control} from 'rete';
+import { HistoryPlugin, Action} from "rete-history-plugin";
+
 
 class NumControl extends Rete.Control {
     static component = ({ value, onChange }) => (
@@ -375,6 +377,14 @@ class ChatControl extends Control {
   }
 
   setValue(val) {
+    this.emitter.trigger('addhistory', new FieldChangeAction(this.props.messages, val, (v) => this.set(v)));
+    this.props.messages = val;
+    this.putData(this.key, val);
+    this.update();
+  }
+
+  set(val) {
+    //internal method for redo/undo
     this.props.messages = val;
     this.putData(this.key, val);
     this.update();
@@ -386,6 +396,20 @@ class ChatControl extends Control {
 }
 
 
+class FieldChangeAction extends Action {
+  constructor(prev, next, set) {
+      super();
+      this.prev = prev;
+      this.next = next;
+      this.set = set;
+  }
+  undo = () =>{
+      this.set(this.prev);
+  }
+  redo = () =>{
+      this.set(this.next);
+  }
+}
 
 
 //Create all of the sockets here. A weird way to do it, but rete does not work if you create sockets in the builder function.

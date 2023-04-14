@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import ReactRenderPlugin from "rete-react-render-plugin";
 import ConnectionPlugin from "rete-connection-plugin";
 import AreaPlugin from "rete-area-plugin";
+import HistoryPlugin from "rete-history-plugin";
 import Context from "efficy-rete-context-menu-plugin";
 
 
@@ -30,6 +31,7 @@ export async function createEditor(container) {
   var editor = new Rete.NodeEditor("demo@0.1.0", container);
   editor.use(ConnectionPlugin);
   editor.use(ReactRenderPlugin, { createRoot });
+  editor.use(HistoryPlugin, { keyboard: true, limit: 50 });
   editor.use(Context);
 
   editor.isResizing = false; // Add this line
