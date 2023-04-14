@@ -19,10 +19,11 @@ export class ChatControlComponent extends Rete.Component {
     //add these back in once it is more mature. remeber to change the control to refernce the input, and not the node:
     // ex. node.addControl vs messages.addControl
     var messages = new Rete.Input("messages", "Chat override", dictSocket);
-    var userMessage = new Rete.Input("user_message", "User message override", textSocket);
+    var userMessage = new Rete.Input("user_message", "message override", textSocket);
     var system_msg = new Rete.Input("system_msg", "System message", textSocket);
     var model = new Rete.Input("model", "Model", textSocket);
     var chat_output = new Rete.Output("chat_output", "Full Chat", dictSocket);
+    var last_response = new Rete.Output("last_response", "Last response", textSocket);
     //var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
 
     model.addControl(new DropdownControl(this.editor, "model", node, availableAssistants, false, "Model: ", defaultModel));
@@ -39,7 +40,8 @@ export class ChatControlComponent extends Rete.Component {
       .addInput(system_msg)
       .addInput(userMessage)
       .addInput(messages)
-      .addOutput(chat_output);
+      .addOutput(chat_output)
+      .addOutput(last_response);
   }
 
   onChatOverrideClick(node) {
@@ -49,18 +51,19 @@ export class ChatControlComponent extends Rete.Component {
     .find((n) => n.id === node.id)
     .controls.get("chat-box");
 
-    if (ctrl) {
-        // Get the current array of messages
-        var current_messages = ctrl.getValue();
-        // Add the new message object to the array
-        current_messages.push({ role: "user", content: message });
-        // Update the chat-output-box control with the new array
+    // Only perform the update if the control exists and the overide_messages is not undefined or empty
+    if (ctrl && overide_messages !== undefined ) {
+      if (overide_messages.length > 0) {
         ctrl.setValue(overide_messages);
+        console.log("Chat overide sent:", overide_messages);
+      }
     }
   }
   
   onMsgOverideClick(node) {
     const overide_message = node.data.overide_message;
+    console.log("Message overide sent:", overide_message);
+    this.ChatSend(node,overide_message);
   }
 
   onClearClick(node) {
@@ -75,7 +78,11 @@ export class ChatControlComponent extends Rete.Component {
 
 
   async onChatSend(node,message) {
-    
+    //seperate function to allow multiple ways to send a message
+    this.ChatSend(node,message);
+  } 
+
+  async ChatSend(node,message) {
     const ai_model = node.data.model;
     const system_msg = node.data.system_msg;
 
@@ -117,8 +124,7 @@ export class ChatControlComponent extends Rete.Component {
     this.editor.trigger("process");
 
     this.setNodeState(node, 'default');
-    
-  } 
+  }
 
   async callAPI(aiModel, system_msg, message) {
     let apiUrl = "http://localhost:5000/api/";
@@ -152,8 +158,20 @@ export class ChatControlComponent extends Rete.Component {
   }
 
   async worker(node, inputs, outputs) {
+
+    // Update the chat-output-box control with the contents of chat-input-box
+    const ctrl = this.editor.nodes
+    .find((n) => n.id === node.id)
+    .controls.get("chat-box");
+
+    if (ctrl) {
+      outputs["chat_output"] = ctrl.getValue();
+      outputs["last_response"] = node.data.response;
+    }
     node.data.model = inputs["model"].length ? inputs["model"][0] : node.data.model;
     node.data.system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
+    node.data.overide_messages = inputs["messages"].length ? inputs["messages"][0] : node.data.overide_messages;
+    node.data.overide_message = inputs["user_message"].length ? inputs["user_message"][0] : node.data.overide_message;
 
     let state = this.getNodeState(node);
     if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
