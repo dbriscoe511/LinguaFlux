@@ -58,6 +58,7 @@ export async function createEditor(container) {
   editor.trigger("process");
   AreaPlugin.zoomAt(editor, editor.nodes);
 
+  console.log("editor created:", editor);
   return editor;
 }
 
@@ -68,7 +69,7 @@ export function useRete() {
   useEffect(() => {
     if (container) {
       createEditor(container).then((value) => {
-        console.log("created");
+        console.log("created editor", value);
         editorRef.current = value;
       });
     }
@@ -82,8 +83,9 @@ export function useRete() {
       }
     };
   }, []);
+  let editor2 = editorRef.current;
 
-  return [setContainer];
+  return [setContainer, editorRef];
 }
 
 async function add_number_test_blocks(components, editor){
