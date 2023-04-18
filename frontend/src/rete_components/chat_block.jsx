@@ -35,13 +35,23 @@ export class ChatControlComponent extends Rete.Component {
     node.addControl(new ButtonControl(this.editor, "Send message overide", node, this.onMsgOverideClick.bind(this)),"Send message overide");
     node.addControl(new ButtonControl(this.editor, "Clear chat", node, this.onClearClick.bind(this)), "Clear-chat");
 
+    //add all outputs before adding the dynamic ones
+    node.addOutput(chat_output).addOutput(last_response);
+
+    //create the names in the format "breakpoint {index}"
+    if (node.data.breakpoints){
+      let brake_names = [];
+      for (let i = 0; i < node.data.breakpoints.length; i++) {
+        brake_names.push("breakpoint " + node.data.breakpoints[i]);
+      }
+      dynamic_output(node,node.data.breakpoints.length,this.editor,dictSocket,brake_names,false);
+    }
+
     return node
       .addInput(model)
       .addInput(system_msg)
       .addInput(userMessage)
-      .addInput(messages)
-      .addOutput(chat_output)
-      .addOutput(last_response);
+      .addInput(messages);
   }
 
   onChatOverrideClick(node) {
@@ -78,7 +88,7 @@ export class ChatControlComponent extends Rete.Component {
       brake_names.push("breakpoint " + node.data.breakpoints[i]);
     }
     //add the breakpoints as an output
-    dynamic_output(node.id,node.data.breakpoints.length,this.editor,dictSocket,brake_names);
+    dynamic_output(node,node.data.breakpoints.length,this.editor,dictSocket,brake_names);
 
   }
   

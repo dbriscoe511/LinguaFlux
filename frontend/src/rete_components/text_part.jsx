@@ -33,18 +33,28 @@ class ParagraphInput extends Rete.Component {
     builder(node) {
         var out1 = new Rete.Output("text", "Text", textSocket);
         var ctrl = new ParagraphControl(this.editor, "text", node, false);
-        return node.addControl(ctrl).addOutput(out1);
+
+        node.addControl(ctrl); // this control needs to be added before the dynamic_io_manager is called
+        this.dynamic_io_manager(node, false);
+        
+
+        return node.addOutput(out1);
+    }
+
+    dynamic_io_manager(node, runtime=true) {
+      // get items in brackets
+      const substitutor = new StringSubstitutor();
+      let to_replace = substitutor.extractItemsInBrackets(node.data.text);
+      console.log("replace:",to_replace);
+
+      // add dynamic inputs
+      let num_inputs = to_replace.length;
+      dynamic_input(node, num_inputs, this.editor, textSocket, TextControl, to_replace, runtime);
+      return num_inputs;
     }
 
     worker(node, inputs, outputs) {
-        // get items in brackets
-        const substitutor = new StringSubstitutor();
-        let to_replace = substitutor.extractItemsInBrackets(node.data.text);
-        console.log("replace:",to_replace);
-
-        // add dynamic inputs
-        let num_inputs = to_replace.length;
-        dynamic_input(node.id, num_inputs, this.editor, textSocket, TextControl, to_replace);
+        let num_inputs=this.dynamic_io_manager(node);
 
         // get dynamic input values
         let input_values = [];
@@ -66,6 +76,7 @@ class ParagraphInput extends Rete.Component {
         }
 
         // replace items in brackets with dynamic input values
+        const substitutor = new StringSubstitutor();
         let replaced = substitutor.substituteItems(node.data.text, input_values);
         outputs["text"] = replaced;
     }

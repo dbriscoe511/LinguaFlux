@@ -2,6 +2,8 @@ from app import app
 import numpy as np
 import random
 import openai
+import json
+import os
 from flask import Flask, request, jsonify
 
 @app.route('/api/add', methods=['POST'])
@@ -11,6 +13,49 @@ def add_numbers():
     sum = int(np.sum(numbers))
     return jsonify({'sum': sum})
 
+@app.route('/api/save-file', methods=['POST'])
+def save_file():
+    data = request.get_json()
+    file_name = data.get('fileName', '')
+    file_content = data.get('content', '')
+
+    app.logger.info(f"File saveing: {file_name}")
+
+    with open(f"projects/{file_name}", "w") as f:
+        f.write(file_content)
+        app.logger.info(f"File saved: {file_name}")
+
+    return jsonify({'file': file_name})
+
+@app.route('/api/list-files', methods=['GET'])
+def list_files():
+    directory = 'projects' 
+
+    # List all the .json files in the directory
+    file_names = [f for f in os.listdir(directory) if f.endswith('.json')]
+    app.logger.info(f"grabbed current project list: {file_names}")
+
+    return jsonify({'fileNames': file_names})
+
+
+@app.route('/api/load-file', methods=['GET'])
+def load_file():
+    directory = 'projects'
+
+    file_name = request.args.get('fileName', '')
+    app.logger.info(f"File loading: {file_name}")
+    if not file_name:
+        app.logger.error(f"File name is required.")
+        return jsonify({'error': 'File name is required.'}), 400
+
+    try:
+        with open(f"{directory}/{file_name}", 'r') as file:
+            file_content = file.read()
+    except FileNotFoundError:
+        app.logger.error(f"File {directory}/{file_name} not found.")
+        return jsonify({'error': f'File {directory}/{file_name} not found.'}), 404
+
+    return jsonify({'content': json.loads(file_content)})
 
 
 @app.route('/api/llm/fake_assistant', methods=['POST'])
