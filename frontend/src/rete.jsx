@@ -56,7 +56,7 @@ export async function createEditor(container) {
   );
 
   editor.on('showcontextmenu', ({e,node}) => {
-    if (hasMisspelledWord(e)) {
+    if (hasSpellCheck(e)) {
       console.log("has misspelled word, skipping context");
       return false;
     }
