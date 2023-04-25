@@ -6,12 +6,14 @@ import ConnectionPlugin from "rete-connection-plugin";
 import AreaPlugin from "rete-area-plugin";
 import HistoryPlugin from "rete-history-plugin";
 import Context from "efficy-rete-context-menu-plugin";
+import KeyboardPlugin from 'rete-keyboard-plugin';
 
 
 //import custom parts
 import { AddComponent, NumComponent } from "./rete_components/math_part";
 import { TextComponent, ParagraphInput, StaticTextComponent, LLM_comp} from "./rete_components/text_part";
 import { ChatControlComponent } from "./rete_components/chat_block";
+import { hasMisspelledWord } from "./components/spellcheck-renable";
 
 
 
@@ -32,9 +34,8 @@ export async function createEditor(container) {
   editor.use(ConnectionPlugin);
   editor.use(ReactRenderPlugin, { createRoot });
   editor.use(HistoryPlugin, { keyboard: true, limit: 50 });
+  editor.use(KeyboardPlugin);
   editor.use(Context);
-
-  editor.isResizing = false; // Add this line
 
   var engine = new Rete.Engine("demo@0.1.0");
 
@@ -53,6 +54,16 @@ export async function createEditor(container) {
       await engine.process(editor.toJSON());
     }
   );
+
+  editor.on('showcontextmenu', ({e,node}) => {
+    if (hasMisspelledWord(e)) {
+      console.log("has misspelled word, skipping context");
+      return false;
+    }
+    return !e.node || !editor.components.get(e.node.name).data.noContextMenu;
+  });
+  
+
 
   editor.view.resize();
   editor.trigger("process");

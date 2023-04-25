@@ -9,6 +9,7 @@ export class ChatControlComponent extends Rete.Component {
   constructor() {
     super("Chat Control");
     this.data.component = MyNode;
+    this.data.noContextMenu = true;
   }
 
   builder(node) {
