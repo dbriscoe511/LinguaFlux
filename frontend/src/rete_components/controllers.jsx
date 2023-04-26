@@ -186,7 +186,10 @@ class ParagraphControl extends Control {
       }}
       className="default-text-item"
       ref={(ref) => {
-        ref && ref.addEventListener("pointerdown", (e) => e.stopPropagation());
+        if (ref) {
+          ref.addEventListener("pointerdown", (e) => e.stopPropagation());
+          ref.addEventListener("contextmenu", (e) => e.stopPropagation()); // prevent context menu, allow spellchecking
+        }
       }}
       onChange={(e) => onChange(e.target.value)}
     />
@@ -287,7 +290,15 @@ class ChatControl extends Control {
     
 
     return (
-      <div className={`chat-control`}>
+      <div 
+        className={`chat-control`}
+        ref={(ref) => {
+          if (ref) {
+            ref.addEventListener("pointerdown", (e) => e.stopPropagation());
+            ref.addEventListener("contextmenu", (e) => e.stopPropagation()); // prevent context menu, allow spellchecking
+          }
+        }}
+      >
         <div className="messages-wrapper">
           <div className="messages">
             {messages.map((message, index) => (

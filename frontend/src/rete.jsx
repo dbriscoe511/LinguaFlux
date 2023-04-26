@@ -13,7 +13,6 @@ import KeyboardPlugin from 'rete-keyboard-plugin';
 import { AddComponent, NumComponent } from "./rete_components/math_part";
 import { TextComponent, ParagraphInput, StaticTextComponent, LLM_comp} from "./rete_components/text_part";
 import { ChatControlComponent } from "./rete_components/chat_block";
-import { hasMisspelledWord } from "./components/spellcheck-renable";
 
 
 
@@ -56,10 +55,6 @@ export async function createEditor(container) {
   );
 
   editor.on('showcontextmenu', ({e,node}) => {
-    if (hasSpellCheck(e)) {
-      console.log("has misspelled word, skipping context");
-      return false;
-    }
     return !e.node || !editor.components.get(e.node.name).data.noContextMenu;
   });
   
