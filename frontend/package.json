@@ -18,7 +18,8 @@
     "rete-history-plugin": "^0.2.3",
     "rete-keyboard-plugin": "^0.1.2",
     "rete-react-render-plugin": "0.3.0",
-    "vue": "3.2.37"
+    "vue": "3.2.37",
+    "nth-check": ">=2.0.1"
   },
   "devDependencies": {
     "typescript": "3.3.3"
