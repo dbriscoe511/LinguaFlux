@@ -1,1 +1,2 @@
+TEST_MODE = "False" # Set to True to enable test mode for development
 OPENAI_API_KEY = "put-your-key-here"

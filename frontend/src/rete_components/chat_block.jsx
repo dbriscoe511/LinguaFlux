@@ -12,10 +12,14 @@ export class ChatControlComponent extends Rete.Component {
     this.data.noContextMenu = true;
   }
 
-  builder(node) {
+  async builder(node) {
     let default_system_msg = "You are a helpful assistant.";
-    let availableAssistants = ["GPT3.5", "fake_assistant"];
-    let defaultModel = availableAssistants[1];
+    
+    // Fetch models from the API
+    const modelsData = await this.fetchModels();
+    console.log("Available models:", modelsData);
+    let defaultModel = modelsData[0];
+
 
     //add these back in once it is more mature. remeber to change the control to refernce the input, and not the node:
     // ex. node.addControl vs messages.addControl
@@ -27,7 +31,7 @@ export class ChatControlComponent extends Rete.Component {
     var last_response = new Rete.Output("last_response", "Last response", textSocket);
     //var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
 
-    model.addControl(new DropdownControl(this.editor, "model", node, availableAssistants, false, "Model: ", defaultModel));
+    model.addControl(new DropdownControl(this.editor, "model", node, modelsData, false, "Model: ", defaultModel));
 
     system_msg.addControl(new TextControl(this.editor, "system_msg", node,false, "system_msg: ", default_system_msg));
     node.addControl(new ChatControl(this.editor, "chat-box", node, this.onChatSend.bind(this), this.addBreakPoint.bind(this)));
@@ -54,6 +58,14 @@ export class ChatControlComponent extends Rete.Component {
       .addInput(userMessage)
       .addInput(messages);
   }
+
+  fetchModels = async () =>{
+    const apiUrl = "http://localhost:5000/api/";
+    const response = await axios.get(apiUrl + "llm/request_models");
+    console.log("Response from Flask backend on fetch models:", response);
+    const models = response.data.models;
+    return models;
+  }  
 
   onChatOverrideClick(node) {
     const overide_messages = node.data.overide_messages;
@@ -166,9 +178,9 @@ export class ChatControlComponent extends Rete.Component {
 
   async callAPI(aiModel, system_msg, message) {
     let apiUrl = "http://localhost:5000/api/";
-    let apiEndpoint = `llm/${aiModel}`;
+    let apiEndpoint = `llm/chat`;
 
-    let query = { "system_msg": system_msg, "messages": message };
+    let query = { "system_msg": system_msg, "messages": message, "model": aiModel };
     console.log("Query to Flask backend:", query);
     console.log("API endpoint:", (apiUrl + apiEndpoint));
 

@@ -1,0 +1,46 @@
+LLMs:
+  fake-assistant: # a fake assistant used for testing purpouses. just echos the user messages
+    provider: LF
+    provider_model_name: "fake_assistant"
+    local: true #determines if the model is local (run on users GPU) or remote (run through an API)
+    plugin: "default" # if this model is installed as a plugin, this is the name of the plugin
+    requirements: # the requirements for the model to run. this is used to install the model on the users machine
+      - none
+    #  - has_provider_api_key
+    #  - has_OpenAI_GPT4_access
+    #  - has_gpu_passthrough #checks if docker has access to a gpu
+    #  - has_vram: 8 #checks if the gpu has enough vram (in GB)
+    modes: # each mode has a popularity, which determines the sorting order. this could be with usage data.
+      chat: 100
+      compleation: 100
+      vectorization: 100
+    token_limit: 1
+    cost_per_token: 0
+    test_mode_only: true #this model is just for testing, exclude from production
+  GPT-3.5:
+    provider: OpenAI
+    provider_model_name: "gpt-3.5-turbo"
+    popularity: 85 
+    local: false
+    plugin: "default"
+    requirements:
+      - has_provider_api_key
+    modes: 
+      chat: 90 
+    token_limit: 4096
+    cost_per_token: 2.0E-6
+    test_mode_only: false
+  GPT-4:
+    provider: OpenAI
+    provider_model_name: "gpt-4"
+    popularity: 100
+    local: false
+    plugin: "default"
+    requirements:
+      - has_provider_api_key
+      - has_OpenAI_GPT4_access
+    modes: 
+      chat: 100
+    token_limit: 4096
+    cost_per_token: 2.0E-6
+    test_mode_only: false

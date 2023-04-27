@@ -6,6 +6,11 @@ import json
 import os
 from flask import Flask, request, jsonify
 
+#local imports
+from . import llm_handler
+#This file contains the routes for the API, and the logic to get and send data from them.
+#all other functionaluity is handed off to other functions
+
 @app.route('/api/add', methods=['POST'])
 def add_numbers():
     data = request.get_json()
@@ -57,6 +62,35 @@ def load_file():
 
     return jsonify({'content': json.loads(file_content)})
 
+@app.route("/api/llm/request_models", methods=["GET"])
+def request_models_api():
+    return jsonify({'models': llm_handler.request_models()})
+
+@app.route("/api/llm/chat", methods=["POST"])
+def chat_api():
+    data = request.get_json()
+    model = data.get('model', '')
+    system_msg = data.get('system_msg', '')
+    messages = data.get('messages', [])
+
+    if not model:
+        app.logger.error(f"No model provided")
+        return jsonify({"error": "No model provided"}), 400
+
+    if not messages:
+        app.logger.error(f"No messages provided")
+        return jsonify({"error": "No messages provided"}), 400
+
+    messages.insert(0, {"role": "system", "content": system_msg})
+
+    try:
+        output = llm_handler.chat(model, messages)
+        app.logger.info(f"LLM request successful. Input messages: {messages}, Output message: {output}")
+    except Exception as e:
+        app.logger.error(f"Error calling LLM: {e} \n Input messages: {messages}")
+        return jsonify({"error": "Error calling LLM"}), 500
+
+    return jsonify({'output': output})
 
 @app.route('/api/llm/fake_assistant', methods=['POST'])
 def fake_assistant():
@@ -99,9 +133,6 @@ def GPT3_5():
     if not messages:
         return jsonify({"error": "No messages provided"}), 400
 
-    # Convert messages from {"role-name": "message"} format to [{"role": "role-name", "content": "message"}] format
-    #messages = [{"role": role, "content": content} for message in input_messages for role, content in message.items()]
-    # Add system message as the first message
     messages.insert(0, {"role": "system", "content": system_msg})
 
 
