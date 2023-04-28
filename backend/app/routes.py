@@ -8,6 +8,7 @@ from flask import Flask, request, jsonify
 
 #local imports
 from . import llm_handler
+from . import file_handler
 #This file contains the routes for the API, and the logic to get and send data from them.
 #all other functionaluity is handed off to other functions
 
@@ -19,52 +20,72 @@ def add_numbers():
     return jsonify({'sum': sum})
 
 @app.route('/api/save-file', methods=['POST'])
-def save_file():
+def save_file_api():
     data = request.get_json()
     file_name = data.get('fileName', '')
     file_content = data.get('content', '')
+    directory = data.get('directory', 'projects')
 
-    app.logger.info(f"File saveing: {file_name}")
-
-    with open(f"projects/{file_name}", "w") as f:
-        f.write(file_content)
-        app.logger.info(f"File saved: {file_name}")
+    if not file_name:
+        app.logger.error(f"File name is required. to save file")
+        return jsonify({'error': 'File name is required to save file'}), 400
+    if not file_content:
+        app.logger.error(f"File content is required to save file")
+        return jsonify({'error': 'File content is required to save file'}), 400
+    
+    try:
+        file_handler.save_file(file_name, file_content, directory)
+    except Exception as e:
+        app.logger.error(f"Error saving file: {e}")
+        return jsonify({'error': f'Error saving file: {e}'}), 500
 
     return jsonify({'file': file_name})
 
 @app.route('/api/list-files', methods=['GET'])
-def list_files():
-    directory = 'projects' 
+def list_files_api():
+    directory = request.args.get('directory', 'projects')
 
     # List all the .json files in the directory
-    file_names = [f for f in os.listdir(directory) if f.endswith('.json')]
-    app.logger.info(f"grabbed current project list: {file_names}")
+    try:
+        file_names = file_handler.list_files(directory)
+    except Exception as e:
+        app.logger.error(f"Error listing files: {e}")
+        return jsonify({'error': f'Error listing files: {e}'}), 500
 
     return jsonify({'fileNames': file_names})
 
 
 @app.route('/api/load-file', methods=['GET'])
-def load_file():
-    directory = 'projects'
+def load_file_api():
+    directory = request.args.get('directory', 'projects')
 
     file_name = request.args.get('fileName', '')
-    app.logger.info(f"File loading: {file_name}")
     if not file_name:
         app.logger.error(f"File name is required.")
         return jsonify({'error': 'File name is required.'}), 400
 
     try:
-        with open(f"{directory}/{file_name}", 'r') as file:
-            file_content = file.read()
-    except FileNotFoundError:
-        app.logger.error(f"File {directory}/{file_name} not found.")
-        return jsonify({'error': f'File {directory}/{file_name} not found.'}), 404
+        file_content = file_handler.load_file(file_name, directory)
+    except Exception as e:
+        app.logger.error(f"Error loading file: {e}")
+        return jsonify({'error': f'Error loading file: {e}'}), 500
 
     return jsonify({'content': json.loads(file_content)})
 
 @app.route("/api/llm/request_models", methods=["GET"])
 def request_models_api():
-    return jsonify({'models': llm_handler.request_models()})
+    show_models_missing_requirements = request.args.get(
+        "show_models_missing_requirements", "false"
+    ).lower() == "true"
+    mode = request.args.get("mode", "chat")
+
+    try:
+        models = llm_handler.request_models(show_models_missing_requirements, mode)
+    except Exception as e:
+        app.logger.error(f"Error requesting LLM models: {e}")
+        return jsonify({"error": "Error requesting LLM models"}), 500
+    
+    return jsonify({'models': models})
 
 @app.route("/api/llm/chat", methods=["POST"])
 def chat_api():

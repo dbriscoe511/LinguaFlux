@@ -11,7 +11,7 @@ LLMs:
     #  - has_gpu_passthrough #checks if docker has access to a gpu
     #  - has_vram: 8 #checks if the gpu has enough vram (in GB)
     modes: # each mode has a popularity, which determines the sorting order. this could be with usage data.
-      chat: 100
+      chat: 10
       compleation: 100
       vectorization: 100
     token_limit: 1

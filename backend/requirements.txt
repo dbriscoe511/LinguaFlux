@@ -6,3 +6,4 @@ openai
 langchain
 pyyaml
 python-dotenv
+pexpect
