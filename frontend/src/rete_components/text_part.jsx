@@ -88,18 +88,20 @@ class LLM_comp extends Rete.Component {
         this.data.component = MyNode;
         
     }
-    builder(node) {
-        //todo: move these to a config file       
+    async builder(node) {
+        // Fetch models from the API
+        const modelsData = await this.fetchModels();
+        console.log("Available models:", modelsData);
+        let defaultModel = modelsData[0];    
         let default_system_msg = "You are a helpful assistant.";
-        let avalible_assistants = ["GPT3.5","fake_assistant"]
-        let default_model = avalible_assistants[1];
+
 
         var response = new Rete.Output("text", "Last response", textSocket);
         var model = new Rete.Input("model", "Model", textSocket);
         var system_msg = new Rete.Input("system_msg", "System message", textSocket);
         var message = new Rete.Input("message", "Message", textSocket);
 
-        model.addControl(new DropdownControl(this.editor, "model", node, avalible_assistants, false, "model: ", default_model));
+        model.addControl(new DropdownControl(this.editor, "model", node, modelsData, false, "model: ", defaultModel));
         system_msg.addControl(new TextControl(this.editor, "system_msg", node,false, "system_msg: ", default_system_msg));
         message.addControl(new TextControl(this.editor, "message", node,false, "message: "));
 
@@ -114,6 +116,15 @@ class LLM_comp extends Rete.Component {
           .addControl(confirmButton);
 
     }
+
+    fetchModels = async () =>{
+      const apiUrl = "http://localhost:5000/api/"; //TODO: make this request compleqation specific models
+      const response = await axios.get(apiUrl + "llm/request_models");
+      console.log("Response from Flask backend on fetch models:", response);
+      const models = response.data.models;
+      return models;
+    }  
+
     async onConfirmButtonClick(node) {
       const ai_model = node.data.model;
       const system_msg = node.data.system_msg;
@@ -136,10 +147,10 @@ class LLM_comp extends Rete.Component {
     
     async callAPI(ai_model, system_msg, message) {
       let api_url = "http://localhost:5000/api/";
-      let api_endpoint = `llm/${ai_model}`;
+      let api_endpoint = `llm/completion`;
       
       
-      let query = { "system_msg": system_msg, "messages": [{ role: "user", content: message }] };
+      let query = { "message": message, "model": ai_model };
       console.log("Query to Flask backend:", query);
       console.log("API endpoint:", (api_url + api_endpoint));
   

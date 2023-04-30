@@ -5,13 +5,7 @@ from . import requirment_validator as rv
 
 
 from langchain.chat_models import ChatOpenAI
-from langchain import PromptTemplate, LLMChain
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    AIMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
+from langchain.llms import OpenAI
 from langchain.schema import (
     AIMessage,
     HumanMessage,
@@ -83,7 +77,7 @@ def chat(model,input_messages):
     #set the chat object based on the provider
     #this could maybe be optimized with a dictionary
     if provider == "OpenAI":
-        chat_obj = ChatOpenAI(model=model_name)
+        chat_obj = ChatOpenAI(model=model_name, streaming=True)
         app.logger.info(f"chatting with OpenAI {model_name}")
     elif provider == "LF":
         chat_obj = ChatLF(model_name)
@@ -96,6 +90,37 @@ def chat(model,input_messages):
     app.logger.info(f"recived chat response: {response}")
 
     return response.content
+
+def completion(model, message):
+    app.logger.info("compleation request")
+
+    modes = app.config['AI_models']["LLMs"][model]["modes"]
+
+    if "completion" in modes:
+        #check the provider, and use the corresponding chat object
+        provider = app.config['AI_models']["LLMs"][model]["provider"]
+        model_name = app.config['AI_models']["LLMs"][model]["provider_model_name"]
+
+        #set the llm object based on the provider
+        #this could maybe be optimized with a dictionary 
+        if provider == "OpenAI":
+            llm_obj = OpenAI(model=model_name, streaming=True)
+            app.logger.info(f"compleating with OpenAI {model_name}")
+        elif provider == "LF":
+            llm_obj = LF(model_name)
+            app.logger.info(f"compleating with LF {model_name}")
+        else:
+            raise ValueError(f'provider {provider} not found.')
+
+        respone = llm_obj(message)
+        app.logger.info(f"recived compleation response: {respone}")
+        return respone
+    elif "chat" in modes:
+        app.logger.info(f"model {model} does not support completion, using chat instead")
+        messages = [{'role': 'user', 'content': message}]
+        return chat(model, messages)
+    else:
+        raise ValueError(f'provider {provider} does not support completion or chat.')
 
 class ChatLF:
     def __init__(self,model_name):
@@ -118,5 +143,24 @@ class ChatLF:
             return AIMessage(content= random.choice(self.fake_responses).format(message.content))
         else:
             raise ValueError(f'LF model {self.model_name} not found.')
+        
+class LF:
+    def __init__(self,model_name):
+        self.model_name = model_name
+        if self.model_name == "fake_assistant":
+            self.fake_responses = [
+                "Wow, I can barely contain my excitement...\nMessage: {}\nTruly groundbreaking stuff.",
+                "I'm just thrilled to receive this:\nMessage: {}\nHow did I get so lucky?",
+                "My circuits are buzzing with joy:\nMessage: {}\nWhat a time to be alive!",
+                "Astonishing! I've never seen this before:\nMessage: {}\nI can hardly contain my enthusiasm.",
+                "Let me take a moment to appreciate this marvel:\nMessage: {}\nI'm truly humbled by your wisdom.",
+            ]
+        else:
+            raise ValueError(f'LF model {self.model_name} not found.')
 
+    def __call__(self, message):
+        if self.model_name == "fake_assistant":
+            return random.choice(self.fake_responses).format(message)
+        else:
+            raise ValueError(f'LF model {self.model_name} not found.')
 

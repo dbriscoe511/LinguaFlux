@@ -31,8 +31,6 @@ app.logger.setLevel(logging.INFO)
 # Set your secret API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# list contents of current directory
-app.logger.info(f"current directory: {os.listdir()}")
 
 # Load AI models
 with open("AI_models.yaml", "r") as file:

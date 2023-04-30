@@ -113,6 +113,29 @@ def chat_api():
 
     return jsonify({'output': output})
 
+@app.route("/api/llm/completion", methods=["POST"])
+def completion_api():
+    data = request.get_json()
+    model = data.get('model', '')
+    message = data.get('message', '')
+
+    if not model:
+        app.logger.error(f"No model provided")
+        return jsonify({"error": "No model provided"}), 400
+
+    if not message:
+        app.logger.error(f"No prompt provided")
+        return jsonify({"error": "No prompt provided"}), 400
+
+    try:
+        output = llm_handler.completion(model, message)
+        app.logger.info(f"LLM request successful. Input prompt: {message}, Output message: {output}")
+    except Exception as e:
+        app.logger.error(f"Error calling LLM: {e} \n Input prompt: {message}")
+        return jsonify({"error": "Error calling LLM"}), 500
+
+    return jsonify({'output': output})
+
 @app.route('/api/llm/fake_assistant', methods=['POST'])
 def fake_assistant():
     # This is a fake LLM endpoint that returns a random response from a list of fake responses for testing purposes.
