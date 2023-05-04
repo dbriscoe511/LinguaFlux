@@ -77,7 +77,7 @@ def chat(model,input_messages):
     #set the chat object based on the provider
     #this could maybe be optimized with a dictionary
     if provider == "OpenAI":
-        chat_obj = ChatOpenAI(model=model_name, streaming=True)
+        chat_obj = ChatOpenAI(model=model_name, streaming=True) #streaming mostly prevents timeouts right now, but will be supported in the future. 
         app.logger.info(f"chatting with OpenAI {model_name}")
     elif provider == "LF":
         chat_obj = ChatLF(model_name)

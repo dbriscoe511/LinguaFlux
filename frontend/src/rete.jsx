@@ -12,7 +12,7 @@ import KeyboardPlugin from 'rete-keyboard-plugin';
 //import custom parts
 import { AddComponent, NumComponent } from "./rete_components/math_part";
 import { TextComponent, ParagraphInput, StaticTextComponent, LLM_comp} from "./rete_components/text_part";
-import { ChatControlComponent } from "./rete_components/chat_block";
+import { ChatControlComponent, LLM_chat_comp } from "./rete_components/chat_block";
 
 
 
@@ -26,6 +26,7 @@ export async function createEditor(container) {
     new ParagraphInput(), 
     new StaticTextComponent(), 
     new LLM_comp(), 
+    new LLM_chat_comp(),
     new ChatControlComponent()
   ];
 

@@ -86,23 +86,19 @@ class LLM_comp extends Rete.Component {
     constructor() {
         super("LLM completion");
         this.data.component = MyNode;
-        
+        this.inputChanged = false;
     }
     async builder(node) {
         // Fetch models from the API
         const modelsData = await this.fetchModels();
         console.log("Available models:", modelsData);
-        let defaultModel = modelsData[0];    
-        let default_system_msg = "You are a helpful assistant.";
 
 
         var response = new Rete.Output("text", "Last response", textSocket);
         var model = new Rete.Input("model", "Model", textSocket);
-        var system_msg = new Rete.Input("system_msg", "System message", textSocket);
         var message = new Rete.Input("message", "Message", textSocket);
 
-        model.addControl(new DropdownControl(this.editor, "model", node, modelsData, false, "model: ", defaultModel));
-        system_msg.addControl(new TextControl(this.editor, "system_msg", node,false, "system_msg: ", default_system_msg));
+        model.addControl(new DropdownControl(this.editor, "model", node, modelsData, false, "model: "));
         message.addControl(new TextControl(this.editor, "message", node,false, "message: "));
 
         var confirmButton = new ButtonControl(this.editor, "confirm", node, this.onConfirmButtonClick.bind(this));
@@ -111,7 +107,6 @@ class LLM_comp extends Rete.Component {
         return node
           .addOutput(response)
           .addInput(model)
-          .addInput(system_msg)
           .addInput(message)
           .addControl(confirmButton);
 
@@ -127,14 +122,14 @@ class LLM_comp extends Rete.Component {
 
     async onConfirmButtonClick(node) {
       const ai_model = node.data.model;
-      const system_msg = node.data.system_msg;
       const message = node.data.message;
+      this.inputChanged = false;
   
 
       this.set_node_state(node, 'node_waiting_for_backend');
 
       try{
-        node.data.response = await this.callAPI(ai_model, system_msg, message);
+        node.data.response = await this.callAPI(ai_model, message);
       } catch  (error) {
         console.error("Error calling Flask backend:", error);
         this.set_node_state(node, 'node_processing_error');
@@ -145,7 +140,7 @@ class LLM_comp extends Rete.Component {
       this.set_node_state(node, 'default');
     }
     
-    async callAPI(ai_model, system_msg, message) {
+    async callAPI(ai_model, message) {
       let api_url = "http://localhost:5000/api/";
       let api_endpoint = `llm/completion`;
       
@@ -183,13 +178,21 @@ class LLM_comp extends Rete.Component {
     async worker(node, inputs, outputs) {
 
       outputs["text"] = node.data.response || "";
+
+      const oldModel = node.data.model;
+      const oldMessage = node.data.message;
+
+
       node.data.model = inputs["model"].length ? inputs["model"][0] : node.data.model;
-      node.data.system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
       node.data.message = inputs["message"].length ? inputs["message"][0] : node.data.message;
+
+      this.inputChanged = oldModel !== node.data.model || oldMessage !== node.data.message;
 
       let state = this.get_node_state(node);
       if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
-        this.set_node_state(node, 'node_waiting_for_confirmation');
+        if (this.inputChanged) {
+          this.set_node_state(node, 'node_waiting_for_confirmation');
+        }
       }
 
     }
