@@ -1,6 +1,6 @@
 import React, { useState, Component } from "react";
 import { saveAs } from "file-saver";
-import "./MenuBar.css";
+import "./Menu.css";
 import blankDiagram from './blank-diagram.json';
 import axios from 'axios';
 

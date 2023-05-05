@@ -1,5 +1,20 @@
+@import url('theme.css');
 .App {
   font-family: sans-serif;
   text-align: center;
+  background-color: var(--editor-background);
 }
 
+body{
+  margin:0;
+}
+
+.context-menu>.item{
+   border-bottom: 1px solid var(--select-highlight);
+   background-color: var(--item-background);
+}
+
+.context-menu>.search{
+   border-bottom: 1px solid var(--select-highlight) !important; /*this is overriden by inline css that comes with rete for some reason*/
+   background-color: var(--item-background) !important;
+}

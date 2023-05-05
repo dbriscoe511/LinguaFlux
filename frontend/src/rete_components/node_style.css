@@ -1,7 +1,9 @@
+@import url('../theme.css');
+
 /* sockets */
 .socket{
-    width: 16px;
-    height: 16px;
+    width: var(--socket-size);
+    height: var(--socket-size);
     border: 1px solid rgb(48, 48, 48);
 }
 .socket:hover{
@@ -9,20 +11,20 @@
 }
 
 .socket.input{
-    margin-left: -8px; /*half the width*/
+    margin-left: calc(-1 * var(--socket-size) / 2);
 }
 .socket.output{
-    margin-right: -8px;/*half the width*/
+    margin-right: calc(-1 * var(--socket-size) / 2);
 }
 
 .socket.string-value {
-    background: rgb(255, 113, 91);
+    background: var(--highlight-color-2);
 }
 .socket.number-value {
-    background: rgb(13, 104, 116);
+    background: var(--highlight-color-3);
 }
 .socket.dictionary-value {
-    background: rgb(49, 0, 68);
+    background: var(--highlight-color-4);
 }
 .socket.default {
     background: grey;
@@ -35,53 +37,23 @@
     stroke: rgb(148, 148, 148);
 }
 
-body{
-   margin:0;
-}
-
-.context-menu>.item{
-    border-bottom: 1px solid #e3c100c2;
-    background-color: rgba(61, 61, 61, 0.8)
-}
-
-.context-menu>.search{
-    border-bottom: 1px solid #e3c100c2 !important; /*this is overriden by inline css that comes with rete for some reason*/
-    background-color: rgba(61, 61, 61, 0.8) !important;
-}
-
-.App {
-    font-family: sans-serif;
-    text-align: center;
-    background-color: rgb(58, 58, 58);
-  }
 
 /* nodes */
 .node{
     box-shadow:6px 6px 13px 2px rgba(0,0,0,0.75);
-    background: rgb(99, 93, 92);
-    border-color:rgb(71, 67, 66)
+    background: var(--item-background);
+    border-color: var(--item-border-color);
 }
 
-/* should apply shadow here to make it go behind the connections. however, it stays in front of connections even here.
-.node:before{
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    box-shadow:6px 6px 13px 2px rgba(0,0,0,0.75);
-    z-index: -10000;
-}*/
 
 /* disable hover effect for now (same as unselected)*/
 .node:hover {
-    background: rgb(99, 93, 92);
+    background: var(--item-background);
 }
 
 .node.selected {
-    background: rgb(99, 93, 92);
-    border: 3px solid #e3c000;
+    background: var(--item-background);
+    border: 3px solid var(--select-highlight);
 }
 
 .node .title {
@@ -103,26 +75,26 @@ body{
 }
 /* controllers */
 .default-text-item {
-    background: rgba(138, 131, 129);
-    border-color:rgb(71, 67, 66);
-    color: rgb(255, 255, 255);
-    border-radius: 5px;
+    background: var(--editable-item-backround);
+    border-color: var(--item-border-color);
+    color: var(--default-text-color);
+    border-radius: var(--default-border-radius);
     font-size: small;
 }
 
 .default-button{
-    background: rgba(138, 131, 129);
-    border-color:rgb(71, 67, 66);
-    color: rgb(255, 255, 255);
-    border-radius: 5px;
+    background: var(--editable-item-backround);
+    border-color: var(--item-border-color);
+    color: var(--default-text-color);
+    border-radius: var(--default-border-radius);
     font-size: small;
 }
 
 .default-button:hover{
-    background: rgb(167, 196, 181);
-    border-color:rgb(71, 67, 66);
-    color: rgb(255, 255, 255);
-    border-radius: 5px;
+    background: var(--button-hover-background-positive);
+    border-color:var(--item-border-color);
+    color: var(--default-text-color);
+    border-radius: var(--default-border-radius);
     font-size: small;
 }
 
@@ -131,9 +103,9 @@ body{
 .chat-control .input-area .input-wrapper {
     display: flex;
     font-size: small;
-    background-color: rgba(138, 131, 129);
-    border-radius: 5px;
-    border: 1px solid black;
+    background-color: var(--editable-item-backround);
+    border-radius: var(--default-border-radius);
+    border: var(--item-border);
     padding: 5px;
   }
   
@@ -142,16 +114,16 @@ body{
     top: 5px;
     height: 2.5em;
     background-color: transparent;
-    border-radius: 5px;
-    color: rgb(255, 255, 255);
+    border-radius: var(--default-border-radius);
+    color: var(--default-text-color);
     border: none;
 }
   
 .chat-control .input-area .send-button:hover,
 .chat-control .edit-button:hover,
 .chat-control .submit-edit-button:hover{
-    background-color: rgb(167, 196, 181);
-    border: 2px solid black;
+    background-color: var(--button-hover-background-positive);
+    border: var(--item-border);
 }
 
 .chat-control .user-input {
@@ -162,7 +134,7 @@ body{
     border: none;
     background-color: transparent;
     resize: none;
-    color: rgb(255, 255, 255);
+    color: var(--default-text-color);
 }
 
 
@@ -174,9 +146,9 @@ body{
     height: 400px;
     min-height: 400px;
     resize: both;
-    color: rgb(255, 255, 255);
-    border: 2px solid black;
-    border-radius: 5px;
+    color: var(--default-text-color);
+    border: var(--item-border);
+    border-radius: var(--default-border-radius);
     padding: 5px;
     display: flex;
     flex-direction: column;
@@ -217,18 +189,18 @@ body{
 
 .chat-control .index-button,
 .chat-control .edit-button {
-    background-color: rgb(138, 131, 129);
-    color: white;
-    border-radius: 5px;
+    background-color: var(--item-background);
+    color: var(--default-text-color);
+    border-radius: var(--default-border-radius);
     font-size: larger;
     border: 2px transparent;
 }
 
 .chat-control .edit-input{
-    background: rgba(138, 131, 129);
-    border-color:rgb(71, 67, 66);
-    color: rgb(255, 255, 255);
-    border-radius: 5px;
+    background: var(--item-background);
+    border-color:var(--item-border-color);
+    color: var(--default-text-color);
+    border-radius: var(--default-border-radius);
     font-size: small;
     width: 100%;
     flex-grow: 1;
@@ -248,8 +220,8 @@ body{
 }
 
 .chat-control .index-button:hover {
-    background-color: rgb(49, 0, 68);
-    border: 2px solid black;
+    background-color: var(--highlight-color-4);
+    border: var(--item-border);
 }
 
 

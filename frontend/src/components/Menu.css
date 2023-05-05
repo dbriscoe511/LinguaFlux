@@ -1,10 +1,11 @@
+@import url('../theme.css');
 /* MenuBar.css */
 .menu-container {
     display: flex;
     float: right;
     position: fixed;
     width: 100%;
-    background-color: #333;
+    background-color: var(--menu-background);
     z-index: 9999; 
     user-select: none;
   }
@@ -13,8 +14,8 @@
     position: relative;
     display: inline-block;
     cursor: pointer;
-    color: white;
-    background-color: #333;
+    color: var(--default-text-color);
+    background-color: var(--menu-background);
     padding: 4px 16px;
     font-size: smaller;
   }
@@ -26,22 +27,22 @@
     list-style-type: none;
     padding: 0;
     margin: 0;
-    background-color: #333;
+    background-color: var(--menu-background);
     border: 1px solid #ccc;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
+    border-radius: var(--default-border-radius);
   }
   
   .menu li {
     padding: 4px 16px;
     cursor: pointer;
     white-space: nowrap;
-    color: white;
+    color: var(--default-text-color);
     text-align: left;
   }
   
   .menu li:hover {
-    background-color: #555;
+    background-color: var(--item-background);;
     border-radius: inherit;
   }
   
@@ -67,10 +68,10 @@
 }
   
 .modal-content {
-  background-color: #333;
+  background-color: var(--menu-background);
   padding: 16px;
-  border-radius: 5px;
-  color: white;
+  border-radius: var(--default-border-radius);
+  color: var(--default-text-color);
   max-width: 400px;
 }
   
@@ -95,7 +96,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: white;
+  color: var(--default-text-color);
   font-weight: bold;
   white-space: nowrap;
   user-select: none;
@@ -105,18 +106,18 @@
   list-style: none;
   list-style-position: inside;
   justify-content: left;
-  border-radius: 5px;
+  border-radius: var(--default-border-radius);
   padding: 0.25em;
 }
 
 .load-items:hover{
-  background-color: rgb(255, 113, 91);
+  background-color: var(--highlight-color-2);
 }
 
 .load-box{
-  background-color: #555;
-  border: 2px solid black;
-  border-radius: 5px;
+  background-color: var(--item-background);;
+  border: var(--item-border);
+  border-radius: var(--default-border-radius);
   padding: 0.25em;
   max-height: 90%;
   justify-content: left;
