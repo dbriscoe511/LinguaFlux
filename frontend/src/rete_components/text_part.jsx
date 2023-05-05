@@ -1,8 +1,8 @@
 import Rete from "rete";
-import axios from 'axios';
 import { dynamic_input, StringSubstitutor } from './dynamic_io';
-import { MyNode } from './MyNode';
-import {TextControl, textSocket, ParagraphControl, DropdownControl, dictSocket, ButtonControl} from "./controllers";
+import { MyNode, getNodeState, setNodeState } from './MyNode';
+import {TextControl, textSocket, ParagraphControl, DropdownControl, ButtonControl} from "./controllers";
+import {fetchModelsApi,completeApi} from "../components/routes";
 
 class TextComponent extends Rete.Component {
     //single line input, not super useful
@@ -90,7 +90,7 @@ class LLM_comp extends Rete.Component {
     }
     async builder(node) {
         // Fetch models from the API
-        const modelsData = await this.fetchModels();
+        const modelsData = await fetchModelsApi();
         console.log("Available models:", modelsData);
 
 
@@ -112,69 +112,20 @@ class LLM_comp extends Rete.Component {
 
     }
 
-    fetchModels = async () =>{
-      const apiUrl = "http://localhost:5000/api/"; //TODO: make this request compleqation specific models
-      const response = await axios.get(apiUrl + "llm/request_models");
-      console.log("Response from Flask backend on fetch models:", response);
-      const models = response.data.models;
-      return models;
-    }  
-
     async onConfirmButtonClick(node) {
       const ai_model = node.data.model;
       const message = node.data.message;
       this.inputChanged = false;
-  
 
-      this.set_node_state(node, 'node_waiting_for_backend');
+      setNodeState(this.editor, node, 'node_waiting_for_backend');
 
-      try{
-        node.data.response = await this.callAPI(ai_model, message);
-      } catch  (error) {
-        console.error("Error calling Flask backend:", error);
-        this.set_node_state(node, 'node_processing_error');
-        node.data.response = error.message;
-      }
+      node.data.response = await completeApi(ai_model, message);
+
       this.editor.trigger("process");
 
-      this.set_node_state(node, 'default');
+      setNodeState(this.editor, node, 'default');
     }
     
-    async callAPI(ai_model, message) {
-      let api_url = "http://localhost:5000/api/";
-      let api_endpoint = `llm/completion`;
-      
-      
-      let query = { "message": message, "model": ai_model };
-      console.log("Query to Flask backend:", query);
-      console.log("API endpoint:", (api_url + api_endpoint));
-  
-      let stringy = "";
-      try {
-        const response = await axios.post((api_url + api_endpoint), query);
-        console.log("Response from Flask backend:", response);
-        stringy = response.data.output;
-        console.log("Response from Flask backend data:", stringy);
-      } catch (error) {
-        console.error("Error calling Flask backend:", error);
-      }
-
-      
-      return stringy;
-    }
-
-    set_node_state(node, state) {
-      // this is a hack, but I dont know how else to do it
-      let instance = this.editor.nodes.find((n) => n.id === node.id);;
-      instance.setMeta({nodeState: state});
-      instance.update();
-    }
-    get_node_state(node) {
-      // this is a hack, but I dont know how else to do it
-      let instance = this.editor.nodes.find((n) => n.id === node.id);;
-      return instance.meta.nodeState;
-    }
-
     async worker(node, inputs, outputs) {
 
       outputs["text"] = node.data.response || "";
@@ -188,10 +139,10 @@ class LLM_comp extends Rete.Component {
 
       this.inputChanged = oldModel !== node.data.model || oldMessage !== node.data.message;
 
-      let state = this.get_node_state(node);
+      let state = getNodeState(this.editor, node);
       if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
         if (this.inputChanged) {
-          this.set_node_state(node, 'node_waiting_for_confirmation');
+          setNodeState(this.editor, node, 'node_waiting_for_confirmation');
         }
       }
 

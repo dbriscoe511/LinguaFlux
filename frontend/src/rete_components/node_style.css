@@ -45,6 +45,27 @@
     border-color: var(--item-border-color);
 }
 
+/*node title bar colors*/
+.node-processing-error {
+    background: red;
+  }
+  
+  .node-waiting-for-backend {
+    background: var(--highlight-color-4);
+  }
+  
+  .node-waiting-for-confirmation {
+    background: var(--highlight-color-1);
+  }
+  
+  .ghost-node {
+    background: var(--highlight-color-3);
+  }
+  
+  .default-node {
+    background: var(--highlight-color-2);
+  }
+  
 
 /* disable hover effect for now (same as unselected)*/
 .node:hover {

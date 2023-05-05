@@ -7,23 +7,24 @@ export class MyNode extends Node {
     const { node, bindSocket, bindControl} = this.props;
     const { outputs, controls, inputs, selected} = this.state;
 
-    const getNodeColor = (nodeState) => {
+    const getNodeClass = (nodeState) => {
       switch (nodeState) {
         case 'node_processing_error':
-          return 'red';
+          return 'node-processing-error';
         case 'node_waiting_for_backend':
-          return 'rgb(95, 15, 64)';
+          return 'node-waiting-for-backend';
         case 'node_waiting_for_confirmation':
-          return 'rgb(167, 196, 181)';
+          return 'node-waiting-for-confirmation';
         case 'ghost_node':
-          return 'rgb(116, 148, 234)';
+          return 'ghost-node';
         default:
-          return 'rgb(247, 153, 110)';
+          return 'default-node';
       }
     };
+    
     return (
       <div className={`node ${selected}`} >
-        <div className="title" style={{ background: getNodeColor(node.meta.nodeState) }}>
+        <div className={`title ${getNodeClass(node.meta.nodeState)}`}>
           {node.name}
         </div>
         <div className="node-content" style={{ display: "flex" }}> {/* Add this container div */}
@@ -82,4 +83,16 @@ export class MyNode extends Node {
     );
     
   }
+}
+
+//functions for interacting with node state
+export function setNodeState(editor, node, state) {
+  let instance = editor.nodes.find((n) => n.id === node.id);;
+  instance.setMeta({ nodeState: state });
+  instance.update();
+}
+
+export function getNodeState(editor, node) {
+  let instance = editor.nodes.find((n) => n.id === node.id);;
+  return instance.meta.nodeState;
 }

@@ -1,8 +1,8 @@
 import Rete from "rete";
-import axios from 'axios';
-import { dynamic_input, dynamic_output, StringSubstitutor } from './dynamic_io';
-import { MyNode } from './MyNode';
-import {TextControl, textSocket, ParagraphControl, DropdownControl, dictSocket, ButtonControl,ChatControl} from "./controllers";
+import { dynamic_output } from './dynamic_io';
+import { MyNode, getNodeState, setNodeState } from './MyNode';
+import {TextControl, textSocket, DropdownControl, dictSocket, ButtonControl,ChatControl} from "./controllers";
+import {fetchModelsApi,chatApi} from "../components/routes";
 
 
 export class ChatControlComponent extends Rete.Component {
@@ -16,7 +16,7 @@ export class ChatControlComponent extends Rete.Component {
     let default_system_msg = "You are a helpful assistant.";
     
     // Fetch models from the API
-    const modelsData = await this.fetchModels();
+    const modelsData = await fetchModelsApi();
     console.log("Available models:", modelsData);
 
 
@@ -57,14 +57,6 @@ export class ChatControlComponent extends Rete.Component {
       .addInput(userMessage)
       .addInput(messages);
   }
-
-  fetchModels = async () =>{
-    const apiUrl = "http://localhost:5000/api/";
-    const response = await axios.get(apiUrl + "llm/request_models");
-    console.log("Response from Flask backend on fetch models:", response);
-    const models = response.data.models;
-    return models;
-  }  
 
   onChatOverrideClick(node) {
     const overide_messages = node.data.overide_messages;
@@ -150,17 +142,10 @@ export class ChatControlComponent extends Rete.Component {
     }
     this.editor.trigger("process");
 
-    this.setNodeState(node, 'node_waiting_for_backend');
+    setNodeState(this.editor, node, 'node_waiting_for_backend');
     
-    try{
-        node.data.response = await this.callAPI(ai_model, system_msg, current_messages);
-    } catch  (error) {
-        console.error("Error calling Flask backend:", error);
-        this.setNodeState(node, 'node_processing_error');
-        node.data.response = error.message;
-    }
+    node.data.response = await chatApi(ai_model, system_msg, current_messages);
 
-    
     //update the chat-output-box control with the new message
     if(ctrl){
         let current_messages = ctrl.getValue();
@@ -172,38 +157,7 @@ export class ChatControlComponent extends Rete.Component {
 
     this.editor.trigger("process");
 
-    this.setNodeState(node, 'default');
-  }
-
-  async callAPI(aiModel, system_msg, message) {
-    let apiUrl = "http://localhost:5000/api/";
-    let apiEndpoint = `llm/chat`;
-
-    let query = { "system_msg": system_msg, "messages": message, "model": aiModel };
-    console.log("Query to Flask backend:", query);
-    console.log("API endpoint:", (apiUrl + apiEndpoint));
-
-    let updatedMessages = {};
-    try {
-      const response = await axios.post((apiUrl + apiEndpoint), query);
-      console.log("Response from Flask backend:", response);
-      updatedMessages = response.data.output;
-    } catch (error) {
-      console.error("Error calling Flask backend:", error);
-    }
-
-    return updatedMessages;
-  }
-
-  setNodeState(node, state) {
-    let instance = this.editor.nodes.find((n) => n.id === node.id);;
-    instance.setMeta({ nodeState: state });
-    instance.update();
-  }
-
-  getNodeState(node) {
-    let instance = this.editor.nodes.find((n) => n.id === node.id);;
-    return instance.meta.nodeState;
+    setNodeState(this.editor, node, 'default');
   }
 
   async worker(node, inputs, outputs) {
@@ -229,9 +183,9 @@ export class ChatControlComponent extends Rete.Component {
     node.data.overide_messages = inputs["messages"].length ? inputs["messages"][0] : node.data.overide_messages;
     node.data.overide_message = inputs["user_message"].length ? inputs["user_message"][0] : node.data.overide_message;
 
-    let state = this.getNodeState(node);
+    let state = setNodeState(this.editor, node);
     if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
-      this.setNodeState(node, 'node_waiting_for_confirmation');
+      setNodeState(this.editor, node, 'node_waiting_for_confirmation');
     }
   }
 }
@@ -245,7 +199,7 @@ export class LLM_chat_comp extends Rete.Component {
   async builder(node) {
       let default_system_msg = "You are a helpful assistant.";
       // Fetch models from the API
-      const modelsData = await this.fetchModels();
+      const modelsData = await fetchModelsApi();
       console.log("Available models:", modelsData); 
 
 
@@ -274,14 +228,6 @@ export class LLM_chat_comp extends Rete.Component {
 
   }
 
-  fetchModels = async () =>{
-    const apiUrl = "http://localhost:5000/api/"; //TODO: make this request compleqation specific models
-    const response = await axios.get(apiUrl + "llm/request_models");
-    console.log("Response from Flask backend on fetch models:", response);
-    const models = response.data.models;
-    return models;
-  }  
-
   async onConfirmButtonClick(node) {
     const ai_model = node.data.model;
     const message = node.data.message;
@@ -289,7 +235,7 @@ export class LLM_chat_comp extends Rete.Component {
     this.inputChanged = false;
 
 
-    this.set_node_state(node, 'node_waiting_for_backend');
+    setNodeState(this.editor, node, 'node_waiting_for_backend');
     //set the current messages to the overide messages, umless the overide messages is empty set it to an empyt array
     let current_messages = node.data.messages ? node.data.messages : [];
     //if message is not empty add it to the current messages
@@ -298,64 +244,20 @@ export class LLM_chat_comp extends Rete.Component {
       current_messages.push(formatted_message);
     } else{
       //error if message is empty
-      this.set_node_state(node, 'node_processing_error');
+      setNodeState(this.editor, node, 'node_processing_error');
       node.data.response = "Error: message is empty";
       this.editor.trigger("process");
       return;
     }
 
+    node.data.response = await chatApi(ai_model,system_msg, current_messages);
 
-
-
-
-    try{
-      node.data.response = await this.callAPI(ai_model,system_msg, current_messages);
-    } catch  (error) {
-      console.error("Error calling Flask backend:", error);
-      this.set_node_state(node, 'node_processing_error');
-      node.data.response = error.message;
-    }
     this.editor.trigger("process");
     let formatted_response = { "role": "assistant", "content": node.data.response}
     current_messages.push(formatted_response)
     node.data.outmessages = current_messages;
 
-    this.set_node_state(node, 'default');
-  }
-  
-  async callAPI(aiModel, system_msg, message) {
-    let api_url = "http://localhost:5000/api/";
-    let api_endpoint = `llm/chat`;
-    
-    
-    let query = { "system_msg": system_msg, "messages": message, "model": aiModel };
-    console.log("Query to Flask backend:", query);
-    console.log("API endpoint:", (api_url + api_endpoint));
-
-    let stringy = "";
-    try {
-      const response = await axios.post((api_url + api_endpoint), query);
-      console.log("Response from Flask backend:", response);
-      stringy = response.data.output;
-      console.log("Response from Flask backend data:", stringy);
-    } catch (error) {
-      console.error("Error calling Flask backend:", error);
-    }
-
-    
-    return stringy;
-  }
-
-  set_node_state(node, state) {
-    // this is a hack, but I dont know how else to do it
-    let instance = this.editor.nodes.find((n) => n.id === node.id);;
-    instance.setMeta({nodeState: state});
-    instance.update();
-  }
-  get_node_state(node) {
-    // this is a hack, but I dont know how else to do it
-    let instance = this.editor.nodes.find((n) => n.id === node.id);;
-    return instance.meta.nodeState;
+    setNodeState(this.editor, node, 'default');
   }
 
   async worker(node, inputs, outputs) {
@@ -381,10 +283,10 @@ export class LLM_chat_comp extends Rete.Component {
       oldSystemMsg !== node.data.system_msg ||
       oldMessages !== node.data.messages;
 
-    let state = this.get_node_state(node);
+    let state = setNodeState(this.editor, node);
     if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
       if (this.inputChanged) {
-        this.set_node_state(node, 'node_waiting_for_confirmation');
+        setNodeState(this.editor, node, 'node_waiting_for_confirmation');
       }
     }
 
