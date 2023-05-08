@@ -22,8 +22,8 @@ def add_numbers():
 @app.route('/api/save-file', methods=['POST'])
 def save_file_api():
     data = request.get_json()
-    file_name = data.get('fileName', '')
-    file_content = data.get('content', '')
+    file_name = data.get('file_name', '')
+    file_content = data.get('file_content', '')
     directory = data.get('directory', 'projects')
 
     if not file_name:

@@ -2,7 +2,9 @@ import React, { useState, Component } from "react";
 import { saveAs } from "file-saver";
 import "./Menu.css";
 import blankDiagram from './blank-diagram.json';
-import axios from 'axios';
+
+import { NewProjectModal,SaveAsModal,LoadProjectModal } from "./modal";
+import { saveLocal, listFiles, loadLocal } from "./routes";
 
 
 export class MenuBar extends Component {
@@ -40,30 +42,14 @@ export class MenuBar extends Component {
   handleSave = async () => {
     const { editor } = this.props;
     if (editor) {
-      const data = editor.current.toJSON();
+      let data = editor.current.toJSON();
   
       // Add the project description to the editor data
       data.projectDescription = this.state.projectDescription;
   
       const fileName = this.state.projectName || 'diagram';
-  
-      // Prepare the object to be sent to the backend
-      const fileData = {
-        fileName: `${fileName}.json`,
-        content: JSON.stringify(data, null, 2),
-      };
-  
-      const apiUrl = "http://localhost:5000/api/";
-      const apiEndpoint = "save-file";
-  
-      try {
-        const response = await axios.post(apiUrl + apiEndpoint, fileData);
-        console.log("Response from backend:", response);
-        // Handle the response as needed, e.g., show a success message
-      } catch (error) {
-        console.error("Error calling backend:", error);
-        // Handle the error as needed, e.g., show an error message
-      }
+      const content = JSON.stringify(data, null, 2);
+      saveLocal(`${fileName}.json`, content, "projects");
     }
   };
 
@@ -88,53 +74,29 @@ export class MenuBar extends Component {
         }
       )
     );
-
-    // Save the project
     this.handleSave();
 
-    // Close the Save As modal
     this.setState({ showSaveAsModal: false });
   };
 
   handleFetchFiles = async () => {
-    // Replace the URL and endpoint with your own backend details
-    const apiUrl = "http://localhost:5000/api/";
-    const apiEndpoint = "/list-files";
-  
-    try {
-      const response = await axios.get(apiUrl + apiEndpoint);
-      console.log("Response from backend for file list:", response);
-  
-      const fileList = response.data.fileNames;
-  
-      this.setState({ fileList:fileList });
-    } catch (error) {
-      console.error("Error calling backend:", error);
-    }
+    const files = await listFiles("projects");
+    this.setState({ fileList:files });
     this.setState({ showLoadModal: true });
   };
   
   handleLoad = async (fileName) => {
-    // Replace the URL and endpoint with your own backend details
-    const apiUrl = "http://localhost:5000/api/";
-    const apiEndpoint = "load-file";
-  
-    try {
-      const response = await axios.get(apiUrl + apiEndpoint, { params: { fileName: fileName } });
-      console.log("Response from backend:", response);
-  
-      const data = response.data.content;
-  
-      
-      // Set the project title based on the file name without the extension
-      const projectNameWithoutExtension = fileName.replace(/\.json$/, '');
-      // Set the project description from the loaded data
-      this.setState({ projectName: projectNameWithoutExtension ,projectDescription: data.projectDescription || '' });
-  
-      await this.props.editor.current.fromJSON(data);
-    } catch (error) {
-      console.error("Error calling backend:", error);
-    }
+    const data = await loadLocal(fileName, "projects");
+    
+    // Set the project title based on the file name without the extension
+    const projectNameWithoutExtension = fileName.replace(/\.json$/, '');
+    this.setState({ projectName: projectNameWithoutExtension || '' });
+
+    // Set the project description from the loaded data
+    this.setState({ projectDescription: data.projectDescription || '' });
+
+    await this.props.editor.current.fromJSON(data);
+    this.setState({ showLoadModal: false });
   };  
 
   handleLoad_from_pc = async (event) => {
@@ -162,8 +124,6 @@ export class MenuBar extends Component {
   };
 
   handleNewProjectSubmit = async (projectData) => {
-    //console.log('New project data:', projectData);
-
     // Update the project name and description state
     this.setState({
       projectName: projectData.title,
@@ -248,7 +208,7 @@ export class MenuBar extends Component {
           isOpen={showLoadModal}
           onClose={() => this.setState({ showLoadModal: false })}
           onSubmit={this.handleLoad}
-          fileList={this.state.fileList}
+          fileList={fileList}
           titleText="Load Project"
         />
         <div className="project-name">{projectName || 'Untitled Project'}</div>
@@ -260,155 +220,3 @@ export class MenuBar extends Component {
 
 
 
-class BaseModal extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      title: props.initialValues?.title || "",
-      description: props.initialValues?.description || "",
-    };
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.initialValues !== this.props.initialValues) {
-      this.setState({
-        title: this.props.initialValues?.title || "",
-        description: this.props.initialValues?.description || "",
-      });
-    }
-  }
-  
-  handleSubmit = () => {
-    this.props.onSubmit({ title: this.state.title, description: this.state.description });
-    this.props.onClose();
-  };
-
-  handleChange = (event) => {
-    this.setState({ [event.target.name]: event.target.value });
-  };
-
-  renderForm() {
-    const { titleText } = this.props;
-    const { title, description } = this.state;
-
-    return (
-      <>
-        <div className="modal-data">
-          <h2>{titleText}</h2>
-          <label htmlFor="title">Title</label>
-          <input
-            type="text"
-            name="title"
-            id="title"
-            value={title}
-            onChange={this.handleChange}
-            className="default-text-item"
-          />
-          <label htmlFor="description">Description</label>
-          <textarea
-            name="description"
-            id="description"
-            value={description}
-            onChange={this.handleChange}
-            className="default-text-item"
-            style={{ height: "100px" }}
-          />
-        </div>
-        <button onClick={this.handleSubmit} className="default-button">Create</button>
-        <button onClick={this.props.onClose} className="default-button">Cancel</button>
-      </>
-    );
-  }
-}
-
-class LoadProjectModal extends Component {
-  handleSubmit = (fileName) => {
-    this.props.onSubmit(fileName);
-    this.props.onClose();
-  };
-
-  renderFileList() {
-    const { fileList } = this.props;
-
-    return (
-      <ul className="load-box">
-        {fileList.map((fileName, index) => (
-          <li key={index} onClick={() => this.handleSubmit(fileName)} className="load-items">
-            {fileName}
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
-  render() {
-    const { isOpen, onClose, titleText } = this.props;
-
-    if (!isOpen) {
-      return null;
-    }
-
-    return (
-      <div className={`modal ${isOpen ? "is-active" : ""}`}>
-        <div className="modal-background" onClick={onClose}></div>
-        <div className="modal-content">
-          <div className="modal-container">
-            <h2>{titleText}</h2>
-            <div>
-              {this.renderFileList()}
-            </div>
-            <button onClick={onClose} className="default-button">
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-}
-
-
-class NewProjectModal extends BaseModal {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const { isOpen, onClose } = this.props;
-
-    if (!isOpen) {
-      return null;
-    }
-
-    return (
-      <div className="modal">
-        <div className="modal-content">
-          {this.renderForm()}
-        </div>
-      </div>
-    );
-  }
-}
-
-class SaveAsModal extends BaseModal {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const { isOpen, onClose } = this.props;
-
-    if (!isOpen) {
-      return null;
-    }
-
-    return (
-      <div className="modal">
-        <div className="modal-content">
-          {this.renderForm()}
-        </div>
-      </div>
-    );
-  }
-}

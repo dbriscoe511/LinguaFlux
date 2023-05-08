@@ -34,7 +34,7 @@ export async function createEditor(container) {
   editor.use(ConnectionPlugin);
   editor.use(ReactRenderPlugin, { createRoot });
   editor.use(HistoryPlugin, { keyboard: true, limit: 50 });
-  editor.use(KeyboardPlugin);
+  //editor.use(KeyboardPlugin);
   editor.use(Context);
 
   var engine = new Rete.Engine("demo@0.1.0");
