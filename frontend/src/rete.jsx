@@ -13,6 +13,7 @@ import KeyboardPlugin from 'rete-keyboard-plugin';
 import { AddComponent, NumComponent } from "./rete_components/math_part";
 import { TextComponent, ParagraphInput, StaticTextComponent, LLM_comp, codeInput} from "./rete_components/text_part";
 import { ChatControlComponent, LLM_chat_comp } from "./rete_components/chat_block";
+import { baseComponent } from "./rete_components/base_nodes";
 
 
 
@@ -29,6 +30,7 @@ export async function createEditor(container) {
     new LLM_chat_comp(),
     new ChatControlComponent(),
     new codeInput(),
+    new baseComponent(),
   ];
 
   var editor = new Rete.NodeEditor("demo@0.1.0", container);

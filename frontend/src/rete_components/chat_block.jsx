@@ -12,6 +12,7 @@ export class ChatControlComponent extends baseComponent {
   }
 
   async builder(node) {
+    super.builder(node);
     let default_system_msg = "You are a helpful assistant.";
     
     // Fetch models from the API
@@ -195,6 +196,7 @@ export class LLM_chat_comp extends baseComponent {
       this.inputChanged = false;
   }
   async builder(node) {
+      super.builder(node);
       let default_system_msg = "You are a helpful assistant.";
       // Fetch models from the API
       const modelsData = await fetchModelsApi();

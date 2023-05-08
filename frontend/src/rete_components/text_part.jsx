@@ -11,6 +11,7 @@ class TextComponent extends baseComponent {
     }
   
     builder(node) {  
+      super.builder(node);
       // Create an output with the text socket
       var out1 = new Rete.Output("text", "Text", textSocket);
       var ctrl = new TextControl(this.editor, "text", node);
@@ -44,6 +45,7 @@ class ParagraphInput extends baseComponent {
     }
 
     builder(node) {
+        super.builder(node);
         var out1 = new Rete.Output("text", "Text", textSocket);
         var ctrl = new ParagraphControl(this.editor, "text", node, false);
 
@@ -101,6 +103,7 @@ class LLM_comp extends baseComponent {
         this.inputChanged = false;
     }
     async builder(node) {
+        super.builder(node);
         // Fetch models from the API
         const modelsData = await fetchModelsApi();
         console.log("Available models:", modelsData);
@@ -170,6 +173,7 @@ class StaticTextComponent extends baseComponent {
   }
 
   builder(node) {
+    super.builder(node);
     // Add an input to the component
     var input = new Rete.Input("text", "", textSocket);
     node.addInput(input);

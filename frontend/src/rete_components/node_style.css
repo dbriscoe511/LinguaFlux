@@ -45,6 +45,36 @@
     border-color: var(--item-border-color);
 }
 
+.node .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+
+  }
+
+  .node .node-name {
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+
+  .titlebar-controls {
+    position: absolute;
+    right: 5px;
+  }
+
+  .titlebar-control {
+    z-index: -1;
+    padding-left: 1px;
+    padding-right: 1px;
+  }
+  
+  .title:hover .titlebar-control {
+    z-index: 1;
+    display: inline-block;
+  }
+
 /*node title bar colors*/
 .node-processing-error {
     background: red;
