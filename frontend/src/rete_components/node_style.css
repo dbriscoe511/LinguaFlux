@@ -163,8 +163,6 @@
     font-size: small;
     text-align: left;
     min-width: 400px;
-    width: 600px;
-    height: 400px;
     min-height: 400px;
     resize: both;
     color: var(--default-text-color);

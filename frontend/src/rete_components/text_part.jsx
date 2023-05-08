@@ -180,7 +180,7 @@ class StaticTextComponent extends Rete.Component {
     node.addInput(input);
 
     // Use the StaticTextControl
-    var ctrl = new ParagraphControl(this.editor, "displayText", node, true, {width: 200, height: 100});
+    var ctrl = new ParagraphControl(this.editor, "displayText", node, true, {width: 300, height: 100});
     node.addControl(ctrl);
 
     return node;

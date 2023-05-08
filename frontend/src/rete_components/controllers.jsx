@@ -176,7 +176,7 @@ class DropdownControl extends Rete.Control {
 
 
 class ParagraphControl extends Control {
-  static component = ({ value, onChange, readOnly, size = { width: "300px", height: "200px" } }) => (
+  static component = ({ value, onChange, readOnly, size, onResize }) => (
     <textarea
       value={value}
       readOnly={readOnly}
@@ -189,26 +189,46 @@ class ParagraphControl extends Control {
         if (ref) {
           ref.addEventListener("pointerdown", (e) => e.stopPropagation());
           ref.addEventListener("contextmenu", (e) => e.stopPropagation()); // prevent context menu, allow spellchecking
+
+          // Add a resize event listener
+          // this stores the size in the component state, so it does not change on a load
+          ref.addEventListener("mouseup", (e) => {
+            const newSize = {
+              width: `${ref.offsetWidth}px`,
+              height: `${ref.offsetHeight}px`,
+            };
+            onResize(newSize);
+          });
         }
       }}
       onChange={(e) => onChange(e.target.value)}
     />
   );
 
-  constructor(emitter, key, node, readonly = false, size = { width: "300px", height: "200px" }) {
+  constructor(emitter, key, node, readonly = false, defaultSize = { width: "300px", height: "200px" }) {
     super(key);
     this.emitter = emitter;
     this.key = key;
     this.component = ParagraphControl.component;
+    this.sizeKey = "size";
 
     const initial = node.data[key] || '';
     node.data[key] = initial;
+
+    // Load size from node data or use the default size
+    const size = node.data[this.sizeKey] || defaultSize;
+    node.data[this.sizeKey] = size;
+
     this.props = {
       readonly,
       value: initial,
+      size: size,
       onChange: (v) => {
         this.setValue(v);
         this.emitter.trigger("process");
+      },
+      onResize: (newSize) => {
+        this.putData(this.sizeKey, newSize);
       }
     };
   }
@@ -221,7 +241,7 @@ class ParagraphControl extends Control {
 }
 
 class ChatControl extends Control {
-  static component = ({ messages, onSubmit, addBreakPoint }) => {
+  static component = ({ messages, onSubmit, addBreakPoint, size, onResize }) => {
     const [userText, setUserText] = useState('');
     const [editedMessageIndex, setEditedMessageIndex] = useState(null);
     const [editedMessageValue, setEditedMessageValue] = useState('');
@@ -296,7 +316,21 @@ class ChatControl extends Control {
           if (ref) {
             ref.addEventListener("pointerdown", (e) => e.stopPropagation());
             ref.addEventListener("contextmenu", (e) => e.stopPropagation()); // prevent context menu, allow spellchecking
+
+            // Add a resize event listener
+            // this stores the size in the component state, so it does not change on a load
+            ref.addEventListener("mouseup", (e) => {
+              const newSize = {
+                width: `${ref.offsetWidth}px`,
+                height: `${ref.offsetHeight}px`,
+              };
+              onResize(newSize);
+            });
           }
+        }}
+        style={{
+          width: size.width,
+          height: size.height,
         }}
       >
         <div className="messages-wrapper">
@@ -370,11 +404,22 @@ class ChatControl extends Control {
     this.emitter = emitter;
     this.key = key;
     this.component = ChatControl.component;
+    this.sizeKey = "size";
+
+    const defaultSize = {
+      width: "600px",
+      height: "400px",
+    };
+
+    // Load size from node data or use the default size
+    const size = node.data[this.sizeKey] || defaultSize;
+    node.data[this.sizeKey] = size;
 
     const initial = node.data[key] || [];
     node.data[key] = initial;
     this.props = {
       messages: initial,
+      size: size,
       onSubmit: (message) => {
         onSubmit(node, message);
         this.emitter.trigger("process");
@@ -383,6 +428,10 @@ class ChatControl extends Control {
         addBreakPoint(node, index);
         this.emitter.trigger("process");
       },
+      onResize: (newSize) => {
+        this.putData(this.sizeKey, newSize);
+        console.log("Resized to", newSize);
+      }
       
     };
   }
