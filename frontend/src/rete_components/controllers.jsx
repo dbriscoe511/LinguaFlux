@@ -144,13 +144,13 @@ class DropdownControl extends Rete.Control {
     </div>
   );
 
-  constructor(emitter, key, node, options, readonly = false, label = null, initialValue = "") {
+  constructor(emitter, key, node, options, readonly = false, label = null) {
     super(key);
     this.emitter = emitter;
     this.key = key;
     this.component = DropdownControl.component;
 
-    const initial = node.data[key] || initialValue;
+    const initial = node.data[key] || options[0];
 
     node.data[key] = initial;
     this.props = {
