@@ -1,5 +1,6 @@
 import React from "react";
 import { Node, Socket, Control } from "rete-react-render-plugin";
+import Rete from "rete";
 import "./node_style.css"
 
 export class MyNode extends Node {
@@ -85,14 +86,20 @@ export class MyNode extends Node {
   }
 }
 
-//functions for interacting with node state
-export function setNodeState(editor, node, state) {
-  let instance = editor.nodes.find((n) => n.id === node.id);;
-  instance.setMeta({ nodeState: state });
-  instance.update();
-}
+export class baseComponent extends Rete.Component {
+  constructor(name) {
+      super(name);
+      this.data.component = MyNode
+  }
 
-export function getNodeState(editor, node) {
-  let instance = editor.nodes.find((n) => n.id === node.id);;
-  return instance.meta.nodeState;
+  setNodeState(node, state) {
+    let instance = this.editor.nodes.find((n) => n.id === node.id);;
+    instance.setMeta({ nodeState: state });
+    instance.update();
+  }
+
+  getNodeState(node) {
+    let instance = this.editor.nodes.find((n) => n.id === node.id);;
+    return instance.meta.nodeState;
+  }
 }

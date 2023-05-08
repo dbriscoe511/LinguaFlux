@@ -1,14 +1,13 @@
 import Rete from "rete";
 import { dynamic_output } from './dynamic_io';
-import { MyNode, getNodeState, setNodeState } from './MyNode';
+import { baseComponent } from './base_nodes';
 import {TextControl, textSocket, DropdownControl, dictSocket, ButtonControl,ChatControl} from "./controllers";
 import {fetchModelsApi,chatApi} from "../components/routes";
 
 
-export class ChatControlComponent extends Rete.Component {
+export class ChatControlComponent extends baseComponent {
   constructor() {
     super("Chat Control");
-    this.data.component = MyNode;
     this.data.noContextMenu = true;
   }
 
@@ -142,7 +141,7 @@ export class ChatControlComponent extends Rete.Component {
     }
     this.editor.trigger("process");
 
-    setNodeState(this.editor, node, 'node_waiting_for_backend');
+    this.setNodeState( node, 'node_waiting_for_backend');
     
     node.data.response = await chatApi(ai_model, system_msg, current_messages);
 
@@ -157,7 +156,7 @@ export class ChatControlComponent extends Rete.Component {
 
     this.editor.trigger("process");
 
-    setNodeState(this.editor, node, 'default');
+    this.setNodeState( node, 'default');
   }
 
   async worker(node, inputs, outputs) {
@@ -183,17 +182,16 @@ export class ChatControlComponent extends Rete.Component {
     node.data.overide_messages = inputs["messages"].length ? inputs["messages"][0] : node.data.overide_messages;
     node.data.overide_message = inputs["user_message"].length ? inputs["user_message"][0] : node.data.overide_message;
 
-    let state = setNodeState(this.editor, node);
+    let state = this.getNodeState( node);
     if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
-      setNodeState(this.editor, node, 'node_waiting_for_confirmation');
+      this.setNodeState( node, 'node_waiting_for_confirmation');
     }
   }
 }
 
-export class LLM_chat_comp extends Rete.Component {
+export class LLM_chat_comp extends baseComponent {
   constructor() {
       super("LLM chat completion");
-      this.data.component = MyNode;
       this.inputChanged = false;
   }
   async builder(node) {
@@ -235,7 +233,7 @@ export class LLM_chat_comp extends Rete.Component {
     this.inputChanged = false;
 
 
-    setNodeState(this.editor, node, 'node_waiting_for_backend');
+    this.setNodeState( node, 'node_waiting_for_backend');
     //set the current messages to the overide messages, umless the overide messages is empty set it to an empyt array
     let current_messages = node.data.messages ? node.data.messages : [];
     //if message is not empty add it to the current messages
@@ -244,7 +242,7 @@ export class LLM_chat_comp extends Rete.Component {
       current_messages.push(formatted_message);
     } else{
       //error if message is empty
-      setNodeState(this.editor, node, 'node_processing_error');
+      this.setNodeState( node, 'node_processing_error');
       node.data.response = "Error: message is empty";
       this.editor.trigger("process");
       return;
@@ -257,7 +255,7 @@ export class LLM_chat_comp extends Rete.Component {
     current_messages.push(formatted_response)
     node.data.outmessages = current_messages;
 
-    setNodeState(this.editor, node, 'default');
+    this.setNodeState( node, 'default');
   }
 
   async worker(node, inputs, outputs) {
@@ -283,10 +281,10 @@ export class LLM_chat_comp extends Rete.Component {
       oldSystemMsg !== node.data.system_msg ||
       oldMessages !== node.data.messages;
 
-    let state = setNodeState(this.editor, node);
+    let state = this.setNodeState( node);
     if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
       if (this.inputChanged) {
-        setNodeState(this.editor, node, 'node_waiting_for_confirmation');
+        this.setNodeState( node, 'node_waiting_for_confirmation');
       }
     }
 

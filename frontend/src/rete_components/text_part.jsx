@@ -1,14 +1,13 @@
 import Rete from "rete";
 import { dynamic_input, StringSubstitutor } from './dynamic_io';
-import { MyNode, getNodeState, setNodeState } from './MyNode';
+import { baseComponent } from './base_nodes';
 import {TextControl, textSocket, ParagraphControl, DropdownControl, ButtonControl} from "./controllers";
 import {fetchModelsApi,completeApi} from "../components/routes";
 
-class TextComponent extends Rete.Component {
+class TextComponent extends baseComponent {
     //single line input, not super useful
     constructor() {
       super("Text input");
-      this.data.component = MyNode
     }
   
     builder(node) {  
@@ -23,10 +22,9 @@ class TextComponent extends Rete.Component {
       outputs["text"] = node.data.text;
     }
 }
-class codeInput extends Rete.Component {
+class codeInput extends baseComponent {
     constructor() {
         super("Code");
-        this.data.component = MyNode
     }
 
     builder(node) {
@@ -40,10 +38,9 @@ class codeInput extends Rete.Component {
     }
 }
 
-class ParagraphInput extends Rete.Component {
+class ParagraphInput extends baseComponent {
     constructor() {
         super("Paragraph input");
-        this.data.component = MyNode
     }
 
     builder(node) {
@@ -98,10 +95,9 @@ class ParagraphInput extends Rete.Component {
     }
 }
 
-class LLM_comp extends Rete.Component {
+class LLM_comp extends baseComponent {
     constructor() {
         super("LLM completion");
-        this.data.component = MyNode;
         this.inputChanged = false;
     }
     async builder(node) {
@@ -133,13 +129,13 @@ class LLM_comp extends Rete.Component {
       const message = node.data.message;
       this.inputChanged = false;
 
-      setNodeState(this.editor, node, 'node_waiting_for_backend');
+      this.setNodeState( node, 'node_waiting_for_backend');
 
       node.data.response = await completeApi(ai_model, message);
 
       this.editor.trigger("process");
 
-      setNodeState(this.editor, node, 'default');
+      this.setNodeState( node, 'default');
     }
     
     async worker(node, inputs, outputs) {
@@ -155,10 +151,10 @@ class LLM_comp extends Rete.Component {
 
       this.inputChanged = oldModel !== node.data.model || oldMessage !== node.data.message;
 
-      let state = getNodeState(this.editor, node);
+      let state = this.getNodeState( node);
       if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
         if (this.inputChanged) {
-          setNodeState(this.editor, node, 'node_waiting_for_confirmation');
+          this.setNodeState( node, 'node_waiting_for_confirmation');
         }
       }
 
@@ -168,10 +164,9 @@ class LLM_comp extends Rete.Component {
 
 
 
-class StaticTextComponent extends Rete.Component {
+class StaticTextComponent extends baseComponent {
   constructor() {
     super("Text Display");
-    this.data.component = MyNode
   }
 
   builder(node) {
