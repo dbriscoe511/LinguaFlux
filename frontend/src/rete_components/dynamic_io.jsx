@@ -162,17 +162,45 @@ export function dynamic_input(node, desired_inputs, editor, socket, ControlConst
 }
 
 export class StringSubstitutor {
-    extractItemsInBrackets(str) {
-      const regex = /{(.*?)}/g;
-      let matches = [];
-      let match;
-  
-      while ((match = regex.exec(str)) !== null) {
+  isInsideCodeBlock(str, index) {
+    const codeBlockRegex = /```[\s\S]*?```/g;
+    let match;
+
+    while ((match = codeBlockRegex.exec(str)) !== null) {
+      if (index >= match.index && index <= (match.index + match[0].length)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  isInsideInlineCode(str, index) {
+    const inlineCodeRegex = /`[^`]*?`/g;
+    let match;
+
+    while ((match = inlineCodeRegex.exec(str)) !== null) {
+      if (index >= match.index && index <= (match.index + match[0].length)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  extractItemsInBrackets(str) {
+    const regex = /{(.*?)}/g;
+    let matches = [];
+    let match;
+
+    while ((match = regex.exec(str)) !== null) {
+      if (!this.isInsideCodeBlock(str, match.index) && !this.isInsideInlineCode(str, match.index)) {
         matches.push(match[1]);
       }
-  
-      return matches;
     }
+
+    return matches;
+  }
   
     substituteItems(str, substitutionArray) {
       const itemsInBrackets = this.extractItemsInBrackets(str);

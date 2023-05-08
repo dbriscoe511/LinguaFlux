@@ -23,6 +23,22 @@ class TextComponent extends Rete.Component {
       outputs["text"] = node.data.text;
     }
 }
+class codeInput extends Rete.Component {
+    constructor() {
+        super("Code");
+        this.data.component = MyNode
+    }
+
+    builder(node) {
+        var out1 = new Rete.Output("text", "Text", textSocket);
+        var ctrl = new ParagraphControl(this.editor, "text", node, false);
+        return node.addOutput(out1).addControl(ctrl);
+    }
+
+    worker(node, inputs, outputs) {
+      outputs["text"] = node.data.text;
+    }
+}
 
 class ParagraphInput extends Rete.Component {
     constructor() {
@@ -189,4 +205,4 @@ class StaticTextComponent extends Rete.Component {
 
 
 
-export {TextComponent,ParagraphInput,StaticTextComponent,LLM_comp};
+export {TextComponent,codeInput,ParagraphInput,StaticTextComponent,LLM_comp};
