@@ -12,6 +12,7 @@ export class ChatControlComponent extends baseComponent {
   }
 
   async builder(node) {
+    node.data.tooltip = "A component that provides a chatGPT like interface to talk with AI models. [More info](https://github.com/dbriscoe511/LinguaFlux/tree/main/frontend/src/rete_components#Chat-box)"
     super.builder(node);
     let default_system_msg = "You are a helpful assistant.";
     
@@ -196,6 +197,7 @@ export class LLM_chat_comp extends baseComponent {
       this.inputChanged = false;
   }
   async builder(node) {
+      node.data.tooltip = "Chat completion using LLM, provides chat inputs and outptus to connect to other chat nodes [More info](https://github.com/dbriscoe511/LinguaFlux/tree/main/frontend/src/rete_components#LLM-Chat-Completion)";
       super.builder(node);
       let default_system_msg = "You are a helpful assistant.";
       // Fetch models from the API

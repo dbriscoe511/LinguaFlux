@@ -69,8 +69,12 @@
     padding-left: 1px;
     padding-right: 1px;
   }
-  
+
   .title:hover .titlebar-control {
+    z-index: 1;
+    display: inline-block;
+  }
+  .titlebar-control.selected {
     z-index: 1;
     display: inline-block;
   }
@@ -147,6 +151,17 @@
     color: var(--default-text-color);
     border-radius: var(--default-border-radius);
     font-size: small;
+}
+
+.tooltip-content {
+  background: var(--editable-item-backround);
+  border-color: var(--item-border-color);
+  color: var(--default-text-color);
+  border-radius: var(--default-border-radius);
+  resize: none;
+  font-size: small;
+  user-select: text;
+  width: 95%;
 }
 
 /* chat box component */

@@ -24,7 +24,7 @@ export class MyNode extends Node {
       }
     };
     
-    const titleBarControls = ['rename','delete']; 
+    const titleBarControls = ['rename','delete','tooltip']; 
     const controlsInTitleBar = controls.filter(control => titleBarControls.includes(control.key));
     const otherControls = controls.filter(control => !titleBarControls.includes(control.key));
 
@@ -35,7 +35,7 @@ export class MyNode extends Node {
         <span className="node-name">{node.data.editname}</span>
           {controlsInTitleBar.map(control => (
             <Control
-              className={`titlebar-control`}
+              className={`titlebar-control ${selected}`}
               key={control.key}
               control={control}
               innerRef={bindControl}
@@ -118,39 +118,96 @@ export class baseComponent extends Rete.Component {
     return instance.meta.nodeState;
   }
 
+  toggleTooltip(node) {
+    node.data.showTooltip = !node.data.showTooltip;
+    node.controls.get('tooltipContent').setVisible(node.data.showTooltip);
+    console.log("tooltip",node.controls.get('tooltipContent'))
+    node.update();
+  }
+
   builder(node) {
     //set the editable name
     //just changeing the name confuses the rete engine
+    //node.data.tooltip = "This is a tooltip";
     if (node.data.editname === undefined) {
       node.data.editname = node.name;
     }
-    // Add the rename control
-    const renameControl = new RenameControl(
-      this.editor,
-      "rename",
-      node,
-      false,
-      "Rename",
-      node.data.editname
-    );
+    if (node.data.showTooltip === undefined) {
+      node.data.showTooltip = false;
+    }
+    // Add the title bar controls
+    const renameControl = new RenameControl(this.editor,"rename",node,false,"Rename",node.data.editname);
     node.addControl(renameControl);
 
-    // Add a delete button
-    const deleteControl = new DeleteControl(
-      this.editor,
-      "delete",
-      node,
-      () => {this.editor.removeNode(node);},
-      "X"
-    );
+    const tooltipControl = new TitlebarButton(this.editor,"tooltip",node,() => {this.toggleTooltip(node);},"?",);
+    node.addControl(tooltipControl);
+
+    const tooltipContentControl = new TooltipContentControl(this.editor,"tooltipContent",node,node.data.tooltip);
+    node.addControl(tooltipContentControl);
+
+    const deleteControl = new TitlebarButton(this.editor, "delete", node,() => {this.editor.removeNode(node);},"X");
     node.addControl(deleteControl);
   }
   worker(node, inputs, outputs) {} // rete requires this to exist
 }
 
-class DeleteControl extends ButtonControl {
+class TitlebarButton extends ButtonControl {
   constructor(emitter, key, node, readonly = false, label = null) {
     super(emitter, key, node, readonly, label);
+  }
+}
+
+class TooltipContentControl extends Rete.Control {
+  static component = ({ visible, value }) => {
+
+    // make the text area auto resize to fit the content
+    const textareaRef = React.useRef(null);
+
+    const adjustHeight = () => {
+      const textarea = textareaRef.current;
+      if (textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      }
+    };
+
+    React.useEffect(() => {
+      if (visible) {
+        adjustHeight();
+      }
+    }, [visible, value]);
+
+    return (
+      visible ? (
+        <textarea
+          ref={textareaRef}
+          className="tooltip-content"
+          value={value}
+          readOnly={true}
+        />
+      ) : null
+    );
+  };
+
+  constructor(emitter, key, node, initialValue = "") {
+    super(key);
+    this.emitter = emitter;
+    this.key = key;
+    this.component = TooltipContentControl.component;
+    this.node = node;
+ 
+    const initial = node.data[key] || initialValue;
+
+    node.data[key] = initial;
+    this.props = {
+      visible: node.data.showTooltip,
+      value: initial,
+    };
+  }
+
+  setVisible(visible) {
+    this.props.visible = visible;
+    this.update();
   }
 }
 
@@ -173,13 +230,13 @@ class RenameControl extends Rete.Control {
           />
           <button
             onClick={() => onRename()}
-            className="rename-node-button"
+            className="default-button"
           >
             Confirm
           </button>
           <button
             onClick={onCancel}
-            className="cancel-rename-node-button"
+            className="default-button"
           >
             Cancel
           </button>
@@ -187,7 +244,7 @@ class RenameControl extends Rete.Control {
       ) : (
         <button
           onClick={() => onChange("editing", true)}
-          className="start-rename-node-button"
+          className="default-button"
         >
           E
         </button>

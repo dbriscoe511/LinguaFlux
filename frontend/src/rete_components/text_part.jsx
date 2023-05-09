@@ -10,7 +10,8 @@ class TextComponent extends baseComponent {
       super("Text input");
     }
   
-    builder(node) {  
+    builder(node) {
+      node.data.tooltip = "A basic component to enter a single line of text[More info](https://github.com/dbriscoe511/LinguaFlux/tree/main/frontend/src/rete_components#Single-Line-Text-Input)";  
       super.builder(node);
       // Create an output with the text socket
       var out1 = new Rete.Output("text", "Text", textSocket);
@@ -45,7 +46,9 @@ class ParagraphInput extends baseComponent {
     }
 
     builder(node) {
+        node.data.tooltip = "A component to enter and combine text. add a placeholder in curly brakets to create a new input, `{like this}` [More info](https://github.com/dbriscoe511/LinguaFlux/tree/main/frontend/src/rete_components#Paragraph-Input)";
         super.builder(node);
+
         var out1 = new Rete.Output("text", "Text", textSocket);
         var ctrl = new ParagraphControl(this.editor, "text", node, false);
 
@@ -103,6 +106,7 @@ class LLM_comp extends baseComponent {
         this.inputChanged = false;
     }
     async builder(node) {
+        node.data.tooltip = "A component to use the LLM API to complete text. Does not provide a chat output [More info](https://github.com/dbriscoe511/LinguaFlux/tree/main/frontend/src/rete_components#LLM-Completion)";
         super.builder(node);
         // Fetch models from the API
         const modelsData = await fetchModelsApi();
@@ -173,7 +177,9 @@ class StaticTextComponent extends baseComponent {
   }
 
   builder(node) {
+    node.data.tooltip = "A component to display text [More info](https://github.com/dbriscoe511/LinguaFlux/tree/main/frontend/src/rete_components#Text-display)";
     super.builder(node);
+
     // Add an input to the component
     var input = new Rete.Input("text", "", textSocket);
     node.addInput(input);
