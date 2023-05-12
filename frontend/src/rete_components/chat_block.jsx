@@ -184,10 +184,7 @@ export class ChatControlComponent extends baseComponent {
     node.data.overide_messages = inputs["messages"].length ? inputs["messages"][0] : node.data.overide_messages;
     node.data.overide_message = inputs["user_message"].length ? inputs["user_message"][0] : node.data.overide_message;
 
-    let state = this.getNodeState( node);
-    if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
-      this.setNodeState( node, 'node_waiting_for_confirmation');
-    }
+    this.checkNodeUpdatedState(node, node.data.model+node.data.system_msg+node.data.overide_messages+node.data.overide_message);
   }
 }
 
@@ -267,30 +264,12 @@ export class LLM_chat_comp extends baseComponent {
     outputs["text"] = node.data.response || "";
     outputs["chat_output"] = node.data.outmessages|| [];
 
-    const oldModel = node.data.model;
-    const oldMessage = node.data.message;
-    const oldMessages = node.data.messages;
-    const oldSystemMsg = node.data.system_msg;
-
-
     node.data.model = inputs["model"].length ? inputs["model"][0] : node.data.model;
     node.data.message = inputs["message"].length ? inputs["message"][0] : node.data.message;
     node.data.system_msg = inputs["system_msg"].length ? inputs["system_msg"][0] : node.data.system_msg;
     node.data.messages = inputs["messages"].length ? inputs["messages"][0] : node.data.messages;
 
-
-    this.inputChanged = 
-      oldModel !== node.data.model || 
-      oldMessage !== node.data.message || 
-      oldSystemMsg !== node.data.system_msg ||
-      oldMessages !== node.data.messages;
-
-    let state = this.setNodeState( node);
-    if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
-      if (this.inputChanged) {
-        this.setNodeState( node, 'node_waiting_for_confirmation');
-      }
-    }
+    this.checkNodeUpdatedState(node, node.data.model+node.data.message+node.data.system_msg+node.data.messages);
 
   }
 

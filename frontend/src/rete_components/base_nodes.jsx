@@ -118,6 +118,16 @@ export class baseComponent extends Rete.Component {
     return instance.meta.nodeState;
   }
 
+  checkNodeUpdatedState(node, monitor){
+    if (this.prevmonitor != monitor) {
+      this.prevmonitor = monitor;
+      let state = this.getNodeState( node);
+      if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
+        this.setNodeState( node, 'node_waiting_for_confirmation');
+      }
+    }
+  }
+
   toggleTooltip(node) {
     node.data.showTooltip = !node.data.showTooltip;
     node.controls.get('tooltipContent').setVisible(node.data.showTooltip);

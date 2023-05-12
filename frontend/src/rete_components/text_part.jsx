@@ -149,22 +149,10 @@ class LLM_comp extends baseComponent {
 
       outputs["text"] = node.data.response || "";
 
-      const oldModel = node.data.model;
-      const oldMessage = node.data.message;
-
-
       node.data.model = inputs["model"].length ? inputs["model"][0] : node.data.model;
       node.data.message = inputs["message"].length ? inputs["message"][0] : node.data.message;
 
-      this.inputChanged = oldModel !== node.data.model || oldMessage !== node.data.message;
-
-      let state = this.getNodeState( node);
-      if (state != 'node_waiting_for_backend' && state != 'node_processing_error') {
-        if (this.inputChanged) {
-          this.setNodeState( node, 'node_waiting_for_confirmation');
-        }
-      }
-
+      this.checkNodeUpdatedState( node, node.data.model+node.data.message);
     }
 
 }
