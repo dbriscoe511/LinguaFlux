@@ -135,7 +135,7 @@ export class ChatControlComponent extends baseComponent {
 
     if (ctrl) {
         // Get the current array of messages
-        var current_messages = ctrl.getValue();
+        var current_messages = [...ctrl.getValue()];
         // Add the new message object to the array
         current_messages.push({ role: "user", content: message });
         // Update the chat-output-box control with the new array
@@ -149,7 +149,7 @@ export class ChatControlComponent extends baseComponent {
 
     //update the chat-output-box control with the new message
     if(ctrl){
-        let current_messages = ctrl.getValue();
+        let current_messages = [...ctrl.getValue()];
         //Add the new message to the dictionary
         current_messages.push({ role: "assistant", content: node.data.response });
         //Update the chat-output-box control with the new dictionary
@@ -236,7 +236,7 @@ export class LLM_chat_comp extends baseComponent {
 
     this.setNodeState( node, 'node_waiting_for_backend');
     //set the current messages to the overide messages, umless the overide messages is empty set it to an empyt array
-    let current_messages = node.data.messages ? node.data.messages : [];
+    let current_messages = node.data.messages ? [...node.data.messages] : [];
     //if message is not empty add it to the current messages
     if (message) {
       let formatted_message = { "role": "user", "content": message}
